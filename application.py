@@ -1,9 +1,9 @@
 from flask import Flask, request, render_template, redirect
-from flask.ext.socketio import SocketIO, emit
+from flask.ext.socketio import SocketIO, emit, join_room, leave_room
 app = Flask(__name__)
 
 # GLOBAL VARIABLE
-# Data users[userId] = {"socketIOsessId": "abc123de982321"}
+# Data users[userId] = {}
 users = {}
 
 # Data chats
@@ -18,8 +18,8 @@ socketio = SocketIO(app)
 def addUser(userName):
     users[userName] = {}
 
-def setSessIdofUser(userName, sessId):
-    users[userName]['sessId'] = sessId
+#def setSessIdofUser(userName, socket):
+#    users[userName]['socket'] = socket
 
 def isUserExist(username):
 	if username in users:
@@ -61,6 +61,7 @@ def chatIndex():
 	else:
 		addUser(your_username)
 		if addChat(your_username, partner_username):
+			
 			return render_template("chat.html", your_username = your_username, partner_username = partner_username)
 		else:
 			return redirect("/")
@@ -76,18 +77,14 @@ def onChatConnect(data):
 	# Check if partner is connected
 	while(not (isUserExist(partner_username))):
 		pass
-	setSessIdofUser(your_username, socketio.id)
+
+	#setSessIdofUser(your_username, socketio.socket)
+	join_room(your_username)
 	emit("chatStart")
-    # If yes, check if your parnet is intended to chat with you
-    # If yes, emit chatStart event to client
-    
-    # emit("chatStart", ....) 
-    
-    # If no, do infinite loop here
     
 @socketio.on('sendChatMessage')
 def onSendChatMessage(data):
-    socketio.socket(getSocketIdFromUser(data.destination_username)).emit("receiveMessage", data.message);
+    emit({"receiveMessage", data.message}, room=data.destination_username);
 
 # MAIN PROGRAM
 if __name__ == "__main__":
