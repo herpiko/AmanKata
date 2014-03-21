@@ -68,21 +68,22 @@ def onChatConnect():
 
 @socketio.on('balasConnect', namespace='/sock')
 def onBalasChatConnect(data):
-	
 	join_room(data["your_username"])
 	if addChat(data["your_username"], data["partner_username"]):
 		pass
 	else:
 		emit("chatStart")
 		emit("chatStart", room=data["partner_username"])
-	
 
-	
 @socketio.on('sendChatMessage', namespace='/sock')
 def onSendChatMessage(data):
 	print data
 	emit("receiveMessage", {"message":data['message']}, room=data['destination_username'])
 
+@socketio.on('disconnect', namespace='/sock')
+def onDisconnect():
+	print('Client disconnected')
+
 # MAIN PROGRAM
 if __name__ == "__main__":
-    socketio.run(app)
+    socketio.run(app, host='0.0.0.0')

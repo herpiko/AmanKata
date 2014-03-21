@@ -3,12 +3,17 @@
 <html>
   
   <head>
-    <title>New Page</title>
+    <title>Chat Sekjar</title>
     <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-    <script type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="http:////cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='socket.io.min.js') }}"></script>
+	<style>
+		.pagination-centered {
+		  text-align: center;
+		}
+	</style>
     <script type="text/javascript">
 	$(document).ready(function()
 	{
@@ -22,18 +27,31 @@
 		});
 		socket.on('chatStart', function(msg) 
 		{
-		
+			$('#gambar_loading').fadeOut(500, function() {
+				$('#kotak_pesan').fadeIn(500);
+			});
+			
 		});
 		socket.on('receiveMessage', function(msg) 
 		{			
-			$('#chat_body').append('<tr><td width="5%">'+partner_username+'</td><td>'+msg.message+'</td></tr>)');
+			$('#chat_body').append('<tr class="warning"><td width="5%">'+partner_username+'</td><td>'+msg.message+'</td></tr>)');
 		});
-	    $('#send').click(function(event) 
+		function sendChat()
 		{
 			$('#chat_body').append('<tr><td width="5%">'+your_username+'</td><td>'+$('#message_chat').val()+'</td></tr>)');
 			socket.emit('sendChatMessage', {'message': $('#message_chat').val(), 'destination_username':partner_username});
+			$('#message_chat').val('');
+		}
+	    $('#send').click(function(event) 
+		{
+			sendChat();
 			return false;
 	    });
+		$('#message_chat').keyup(function(event) {
+			if ( event.which == 13 ) {
+				sendChat();
+			}
+		});
 	});
 	   
 	</script>
@@ -52,22 +70,24 @@
           </div>
         </div>
       </div>
-      <div class="row">
-      	<table class="table" id="chat_body">
-		<tr class="warning">
-			<td width="5%">Haidar</td>
-			<td>Chattatatata</td>		
-		</tr>
-		<tr>
-			<td width="5%">Wira</td>
-			<td>Chatatatat</td>
-		</tr>
-		
-	</table>
-	</div>
-	<div class="row">
-	<textarea class="form-control" id="message_chat" rows="3"></textarea>
-	<button id="send" class="btn btn-default">Send</button>
+	  <div class="row-fluid" id="gambar_loading">
+		<div class="span12 pagination-centered">
+			Waiting Partner...
+			<br/>
+			<img src="{{ url_for('static', filename='ajax-loader.gif') }}"/>
+		</div>
+	  </div>
+	 <div id="kotak_pesan" style="display: none">
+		  <div class="alert alert-success text-center">Connected...</div>
+		  <div class="row">
+			<table class="table" id="chat_body">
+			</table>
+		  </div>
+		  <div class="row">
+			<textarea class="form-control" id="message_chat" rows="3"></textarea>
+			<br/>
+			<button id="send" class="btn btn-primary">Send</button>
+		  </div>
 	</div>
 </div>
 
