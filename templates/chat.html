@@ -8,6 +8,29 @@
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <script type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="http:////cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+    <script type="text/javascript">
+	$(document).ready(function()
+	{
+	    var socket = io.connect('http://' + document.domain + ':' + location.port);
+	    socket.on('balasConnectTrigger', function(msg) 
+		{
+			socket.emit('balasConnect', {your_username: $('#your_username').val(),partner_username: $('#your_username').val()});
+		});
+		socket.on('chatStart', function(msg) 
+		{
+			$('#chat_body').append('<tr><td width="5%">XXXX</td><td>Chatatatat</td></tr>)');
+
+		});
+	    $('#send').submit(function(event) 
+		{
+			socket.emit('my event', {data: $('#emit_data').val()});
+			return false;
+	    });
+	});
+	   
+	</script>
+
   </head>
   
   <body>
@@ -18,13 +41,32 @@
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
             </button>
-            <a href="#" class="navbar-brand"><strong>A</strong>man<strong>K</strong>ata - initrunlevel0 with Ihe123321alay</a> <!-- USER ID ditampilkan disini -->
+            <a href="#" class="navbar-brand"><strong>A</strong>man<strong>K</strong>ata - <span id="your_username">{{ your_username }}</span> with <span id="partner_username">{{ partner_username }}</span></a> <!-- USER ID ditampilkan disini -->
           </div>
         </div>
       </div>
       <div class="row">
-       
-    </div>
+      	<table class="table" id="chat_body">
+		<tr class="warning">
+			<td width="5%">Haidar</td>
+			<td>Chattatatata</td>		
+		</tr>
+		<tr>
+			<td width="5%">Wira</td>
+			<td>Chatatatat</td>
+		</tr>
+		
+	</table>
+	</div>
+	<div class="row">
+	<form class="form">
+	<textarea class="form-control" rows="3"></textarea>
+	<button type="submit" id="send" class="btn btn-default">Send</button>
+	</form>
+	</div>
+</div>
+
+    
   </body>
 
 </html>

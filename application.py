@@ -70,6 +70,24 @@ def chatIndex():
 # Initialized after client connected to a chat
 @socketio.on('connect')
 def onChatConnect(data):
+	emit("balasConnectTrigger")
+	#your_username = data.your_username
+	#partner_username = data.partner_username
+    
+	# Check if partner is connected
+	#while(not (isUserExist(partner_username))):
+	#	pass
+	#setSessIdofUser(your_username, socketio.id)
+	#emit("chatStart")
+    # If yes, check if your parnet is intended to chat with you
+    # If yes, emit chatStart event to client
+    
+    # emit("chatStart", ....) 
+    
+    # If no, do infinite loop here
+
+@socketio.on('balasConnect')
+def onBalasChatConnect(data):
 	your_username = data.your_username
 	partner_username = data.partner_username
     
@@ -78,12 +96,6 @@ def onChatConnect(data):
 		pass
 	setSessIdofUser(your_username, socketio.id)
 	emit("chatStart")
-    # If yes, check if your parnet is intended to chat with you
-    # If yes, emit chatStart event to client
-    
-    # emit("chatStart", ....) 
-    
-    # If no, do infinite loop here
     
 @socketio.on('sendChatMessage')
 def onSendChatMessage(data):

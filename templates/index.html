@@ -28,15 +28,17 @@
           <p>Welcome to AmanKata, the greatest anonymous two-party chat framework that can make your conversation between your friend, secret service, and drug dealer become very safe and secure.</p>
         </div>
         <div class="col-md-4 well">
+	  <form class="form" action="/chat" method="POST" >
           <h2>Join Now</h2>
           <p>Enter your secret name here. Be sure that your party know this name exactly so you both can exchange any message together.</p>
-          <input type="text" class="form-control" placeholder="Your ID">
+          <input type="text" name="your_username" class="form-control" placeholder="Your ID">
           <p>Enter your partner user id</p>
-          <input type="text" class="form-control" placeholder="Your Partnet ID">
+          <input type="text" name="partner_username" class="form-control" placeholder="Your Partnet ID">
           <p><i>Your id must only alphanumeric without space.</i></p>
-          <a class="btn btn-primary">Join</a>
+          <button type"submit" class="btn btn-primary">Join</button>
 	  <p>Upon connected to session chat, you just need to wait your party to be connected. Be sure that your party know your user id</p>
-        </div>
+	  </form>        
+	</div>
       </div>
     </div>
   </body>
