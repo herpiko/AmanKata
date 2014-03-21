@@ -12,8 +12,8 @@
     <script type="text/javascript">
 	$(document).ready(function()
 	{
-	    var socket = io.connect('http://' + document.domain + ':' + location.port);
-	    socket.on('balasConnectTrigger', function(msg) 
+	    var socket = io.connect('http://' + document.domain + ':' + location.port + '/sock');
+	    /*socket.on('balasConnectTrigger', function(msg) 
 		{
 			socket.emit('balasConnect', {your_username: $('#your_username').val(),partner_username: $('#your_username').val()});
 		});
@@ -26,7 +26,7 @@
 		{
 			socket.emit('my event', {data: $('#emit_data').val()});
 			return false;
-	    });
+	    });*/
 	});
 	   
 	</script>

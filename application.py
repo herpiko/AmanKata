@@ -69,11 +69,11 @@ def chatIndex():
 
 # SOCKET.IO Event
 # Initialized after client connected to a chat
-@socketio.on('connect')
-def onChatConnect(data):
+@socketio.on('connect', namespace='/sock')
+def onChatConnect():
 	emit("balasConnectTrigger")
 
-@socketio.on('balasConnect')
+@socketio.on('balasConnect', namespace='/sock')
 def onBalasChatConnect(data):
 	your_username = data.your_username
 	partner_username = data.partner_username
@@ -85,10 +85,10 @@ def onBalasChatConnect(data):
 	join_room(your_username)
 	emit("chatStart")
     
-@socketio.on('sendChatMessage')
+@socketio.on('sendChatMessage', namespace='/sock')
 def onSendChatMessage(data):
     emit({"receiveMessage", data.message}, room=data.destination_username);
 
 # MAIN PROGRAM
 if __name__ == "__main__":
-    app.run()
+    socketio.run(app)
