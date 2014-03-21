@@ -22,9 +22,7 @@ def addUser(userName):
 #    users[userName]['socket'] = socket
 
 def isUserExist(username):
-	if username in users:
-		return True
-	return False
+	return username in users
 
 def addChat(username1, username2):
 	if username1 in chats:
@@ -60,12 +58,7 @@ def chatIndex():
 		return redirect("/")
 	else:
 		addUser(your_username)
-		if addChat(your_username, partner_username):
-			
-			return render_template("chat.html", your_username = your_username, partner_username = partner_username)
-		else:
-			return redirect("/")
-	pass
+		return render_template("chat.html", your_username = your_username, partner_username = partner_username)
 
 # SOCKET.IO Event
 # Initialized after client connected to a chat
@@ -75,19 +68,20 @@ def onChatConnect():
 
 @socketio.on('balasConnect', namespace='/sock')
 def onBalasChatConnect(data):
-	your_username = data.your_username
-	partner_username = data.partner_username
-    
-	# Check if partner is connected
-	while(not (isUserExist(partner_username))):
+	
+	join_room(data["your_username"])
+	if addChat(data["your_username"], data["partner_username"]):
 		pass
+	else:
+		emit("chatStart")
+		emit("chatStart", room=data["partner_username"])
+	
 
-	join_room(your_username)
-	emit("chatStart")
-    
+	
 @socketio.on('sendChatMessage', namespace='/sock')
 def onSendChatMessage(data):
-    emit({"receiveMessage", data.message}, room=data.destination_username);
+	print data
+	emit("receiveMessage", {"message":data['message']}, room=data['destination_username'])
 
 # MAIN PROGRAM
 if __name__ == "__main__":

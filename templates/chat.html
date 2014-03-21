@@ -13,20 +13,27 @@
 	$(document).ready(function()
 	{
 	    var socket = io.connect('http://' + document.domain + ':' + location.port + '/sock');
-	    /*socket.on('balasConnectTrigger', function(msg) 
+		var partner_username, your_username;
+	    socket.on('balasConnectTrigger', function(msg) 
 		{
-			socket.emit('balasConnect', {your_username: $('#your_username').val(),partner_username: $('#your_username').val()});
+			partner_username = $('#partner_username').html();
+			your_username = $('#your_username').html()
+			socket.emit('balasConnect', {'your_username': your_username,'partner_username': partner_username});
 		});
 		socket.on('chatStart', function(msg) 
 		{
-			$('#chat_body').append('<tr><td width="5%">XXXX</td><td>Chatatatat</td></tr>)');
-
+		
 		});
-	    $('#send').submit(function(event) 
+		socket.on('receiveMessage', function(msg) 
+		{			
+			$('#chat_body').append('<tr><td width="5%">'+partner_username+'</td><td>'+msg.message+'</td></tr>)');
+		});
+	    $('#send').click(function(event) 
 		{
-			socket.emit('my event', {data: $('#emit_data').val()});
+			$('#chat_body').append('<tr><td width="5%">'+your_username+'</td><td>'+$('#message_chat').val()+'</td></tr>)');
+			socket.emit('sendChatMessage', {'message': $('#message_chat').val(), 'destination_username':partner_username});
 			return false;
-	    });*/
+	    });
 	});
 	   
 	</script>
@@ -59,10 +66,8 @@
 	</table>
 	</div>
 	<div class="row">
-	<form class="form">
-	<textarea class="form-control" rows="3"></textarea>
-	<button type="submit" id="send" class="btn btn-default">Send</button>
-	</form>
+	<textarea class="form-control" id="message_chat" rows="3"></textarea>
+	<button id="send" class="btn btn-default">Send</button>
 	</div>
 </div>
 
