@@ -14,6 +14,15 @@ chats = []
 app.debug = True
 socketio = SocketIO(app)
 
+# DATA VARIABLE MANAGEMENT
+def addUser(userName):
+    users[userName] = {}
+
+def setSessIdofUser(userName, sessId):
+    users[userName]['sessId'] = sessId
+
+# Add more here
+
 # HTML BASED ROUTE
 @app.route("/")
 def index():
@@ -26,20 +35,21 @@ def chatIndex():
     # Tampilkan laman utama chat   
     pass
 
-# JSON BASED ROUTE
-@app.route("/requestChat", methods=['POST'])
-def requestChat():
-    # Kirimkan data yang diperlukan untuk chat dua orang, termasuk seed awal mungkin
-    pass
-
 # SOCKET.IO Event
-# Initialized after client requesting a chat to someone
+# Initialized after client connected to a chat
 @socketio.on('connect')
 def onChatConnect():
+    # Check if partner is connected
+    # If yes, check if your parnet is intended to chat with you
+    # If yes, emit chatStart event to client
+    
+    # emit("chatStart", ....) 
+    
+    # If no, do infinite loop here
     pass
 
 @socketio.on('sendChatMessage')
-def onSendChatMessage():
+def onSendChatMessage(message):
     pass
 
 # MAIN PROGRAM
