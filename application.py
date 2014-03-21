@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, render_template
 from flask.ext.socketio import SocketIO, emit
 app = Flask(__name__)
 
@@ -12,11 +12,13 @@ chats = []
 
 # APP CONFIGURATION
 app.debug = True
+socketio = SocketIO(app)
 
 # HTML BASED ROUTE
 @app.route("/")
 def index():
     # Tampilkan laman Index
+    return render_template("index.html")
     pass
 
 @app.route("/chat")
@@ -25,7 +27,7 @@ def chatIndex():
     pass
 
 # JSON BASED ROUTE
-@app.route("/requestChat")
+@app.route("/requestChat", methods=['POST'])
 def requestChat():
     # Kirimkan data yang diperlukan untuk chat dua orang, termasuk seed awal mungkin
     pass
