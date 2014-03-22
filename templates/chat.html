@@ -17,6 +17,7 @@
     <script type="text/javascript">
 	$(document).ready(function()
 	{
+		var $elem = $('#pesan_body');
 	    var socket = io.connect('http://' + document.domain + ':' + location.port + '/sock');
 		var partner_username, your_username;
 	    socket.on('balasConnectTrigger', function(msg) 
@@ -34,13 +35,15 @@
 		});
 		socket.on('receiveMessage', function(msg) 
 		{			
-			$('#chat_body').append('<tr class="warning"><td width="5%">'+partner_username+'</td><td>'+msg.message+'</td></tr>)');
+			$('#pesan_body').append('<div class="bs-callout bs-callout-left bs-callout-warning"><h4>'+partner_username+'</h4><p>'+msg.message+'</p></div>');
+			$('html, body').animate({scrollTop: $elem.height()}, 800);
 		});
 		function sendChat()
 		{
-			$('#chat_body').append('<tr><td width="5%">'+your_username+'</td><td>'+$('#message_chat').val()+'</td></tr>)');
+			$('#pesan_body').append('<div class="bs-callout bs-callout-right bs-callout-info text-right"><h4>you</h4><p>'+$('#message_chat').val()+'</p></div>');
 			socket.emit('sendChatMessage', {'message': $('#message_chat').val(), 'destination_username':partner_username});
 			$('#message_chat').val('');
+			$('html, body').animate({scrollTop: $elem.height()}, 800);
 		}
 	    $('#send').click(function(event) 
 		{
@@ -52,10 +55,78 @@
 				sendChat();
 			}
 		});
+
+		$('#sidebar').affix(
+		{
+		  offset: {
+		    top: $('.navbar navbar-default').height()
+		  }
+		});
 	});
 	   
 	</script>
+	<style type="text/css">
+	
+		  .bs-sidebar.affix {
+		    width: 450px;
+		    padding-left: 20px;
+		  }
+		
 
+		.bs-callout {
+		    margin: 20px 0;
+		    padding: 20px;
+		}
+
+		.bs-callout-left {
+		    border-left: 3px solid #eee;
+		}
+
+		.bs-callout-right {
+		    border-right: 3px solid #eee;
+		}
+
+		.bs-callout h4 {
+		    margin-top: 0;
+		    margin-bottom: 5px;
+		}
+
+		.bs-callout p:last-child {
+		    margin-bottom: 0;
+		}
+
+		.bs-callout code {
+		    background-color: #fff;
+		    border-radius: 3px;
+		}
+
+		.bs-callout-danger {
+		    background-color: #fdf7f7;
+		    border-color: #d9534f;
+		}
+
+		.bs-callout-danger h4 {
+		    color: #d9534f;
+		}
+
+		.bs-callout-warning {
+		    background-color: #fcf8f2;
+		    border-color: #f0ad4e;
+		}
+
+		.bs-callout-warning h4 {
+		    color: #f0ad4e;
+		}
+
+		.bs-callout-info {
+		    background-color: #f4f8fa;
+		    border-color: #5bc0de;
+		}
+
+		.bs-callout-info h4 {
+		    color: #5bc0de;
+		}
+	</style>
   </head>
   
   <body>
@@ -77,17 +148,25 @@
 			<img src="{{ url_for('static', filename='ajax-loader.gif') }}"/>
 		</div>
 	  </div>
-	 <div id="kotak_pesan" style="display: none">
-		  <div class="alert alert-success text-center">Connected...</div>
-		  <div class="row">
-			<table class="table" id="chat_body">
-			</table>
-		  </div>
-		  <div class="row">
-			<textarea class="form-control" id="message_chat" rows="3"></textarea>
-			<br/>
-			<button id="send" class="btn btn-primary">Send</button>
-		  </div>
+	 <div id="kotak_pesan" style="display:none">
+		<div class="col-md-8" id="pesan_body">
+		  <!--div class="alert alert-success text-center">Connected...</div>
+			<table class="table table-responsive" id="chat_body">
+			</table-->
+			
+		</div>
+		<span id="scroll_down_here"></span>
+		<div class="col-md-4">
+			<div class="bs-sidebar" id="sidebar" style="border-left: 3px solid #eee;">
+				<div style="padding-top: 20px; padding-bottom: 20px">
+					<h2>Chatbox</h2>
+					<p>Send your message here.</p>
+					<textarea class="form-control" id="message_chat" rows="3"  style="width: 350px"></textarea>
+					<br/>
+					<button id="send" class="btn btn-primary">Send</button>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
 
