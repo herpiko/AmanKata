@@ -9,6 +9,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
 	<script type="text/javascript" src="{{ url_for('static', filename='socket.io.min.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename='cryptojs/rollups/aes.js') }}"></script>
 	<style>
 		.pagination-centered {
 		  text-align: center;
@@ -19,7 +20,7 @@
 	{
 		var $elem = $('#pesan_body');
 	    var socket = io.connect('http://' + document.domain + ':' + location.port + '/sock');
-		var partner_username, your_username;
+		var partner_username, your_username, iv, key;
 	    socket.on('balasConnectTrigger', function(msg) 
 		{
 			partner_username = $('#partner_username').html();
@@ -28,22 +29,31 @@
 		});
 		socket.on('chatStart', function(msg) 
 		{
+			iv =  CryptoJS.enc.Hex.parse(msg.iv);
+			key = CryptoJS.enc.Hex.parse(msg.key);
 			$('#gambar_loading').fadeOut(500, function() {
 				$('#kotak_pesan').fadeIn(500);
 			});
 			
 		});
 		socket.on('receiveMessage', function(msg) 
-		{			
-			$('#pesan_body').append('<div class="bs-callout bs-callout-left bs-callout-warning"><h4>'+partner_username+'</h4><p>'+msg.message+'</p></div>');
+		{
+			var decrypted = CryptoJS.AES.decrypt(msg.message, key, {iv: iv} );
+			console.log(decrypted);
+			var decrypted_utf8 = decrypted.toString(CryptoJS.enc.Utf8); 
+			$('#pesan_body').append('<div class="bs-callout bs-callout-left bs-callout-warning"><h4>'+partner_username+'</h4><p>'+decrypted_utf8+'</p></div>');
 			$('html, body').animate({scrollTop: $elem.height()}, 800);
 		});
 		function sendChat()
 		{
 			$('#pesan_body').append('<div class="bs-callout bs-callout-right bs-callout-info text-right"><h4>you</h4><p>'+$('#message_chat').val()+'</p></div>');
-			socket.emit('sendChatMessage', {'message': $('#message_chat').val(), 'destination_username':partner_username});
+			var plaintext = $('#message_chat').val();
+			var encrypted = CryptoJS.AES.encrypt(plaintext, key, { iv: iv });
+			console.log(encrypted);
+			socket.emit('sendChatMessage', {'message': encrypted.toString(), 'destination_username':partner_username});
 			$('#message_chat').val('');
 			$('html, body').animate({scrollTop: $elem.height()}, 800);
+			$('#message_chat').focus();
 		}
 	    $('#send').click(function(event) 
 		{

@@ -1,5 +1,6 @@
 from flask import Flask, request, render_template, redirect
 from flask.ext.socketio import SocketIO, emit, join_room, leave_room
+import random
 app = Flask(__name__)
 
 # GLOBAL VARIABLE
@@ -72,8 +73,14 @@ def onBalasChatConnect(data):
 	if addChat(data["your_username"], data["partner_username"]):
 		pass
 	else:
-		emit("chatStart")
-		emit("chatStart", room=data["partner_username"])
+		key = random.getrandbits(128)
+		iv = random.getrandbits(128)
+		key_hex = hex(key)[2:34]
+		iv_hex = hex(iv)[2:34]
+		print key_hex
+		print iv_hex
+		emit("chatStart", {"key": key_hex, "iv": iv_hex })
+		emit("chatStart", {"key": key_hex, "iv": iv_hex }, room=data["partner_username"])
 
 @socketio.on('sendChatMessage', namespace='/sock')
 def onSendChatMessage(data):
