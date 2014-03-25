@@ -73,14 +73,22 @@ def onBalasChatConnect(data):
 	if addChat(data["your_username"], data["partner_username"]):
 		pass
 	else:
-		key = random.getrandbits(128)
-		iv = random.getrandbits(128)
-		key_hex = hex(key)[2:34]
-		iv_hex = hex(iv)[2:34]
-		print key_hex
-		print iv_hex
-		emit("chatStart", {"key": key_hex, "iv": iv_hex })
-		emit("chatStart", {"key": key_hex, "iv": iv_hex }, room=data["partner_username"])
+		p = 46219
+		q = 46451
+		seed = 0
+		while seed in [0, 1, p, q, p * q]:
+			seed = random.getrandbits(31)
+		print seed
+		#key = random.getrandbits(128)
+		#iv = random.getrandbits(128)
+		#key_hex = hex(key)[2:34]
+		#iv_hex = hex(iv)[2:34]
+		#print key_hex
+		#print iv_hex
+		#emit("chatStart", {"key": key_hex, "iv": iv_hex})
+		#emit("chatStart", {"key": key_hex, "iv": iv_hex}, room=data["partner_username"])
+		emit("chatStart", {"seed": seed})
+		emit("chatStart", {"seed": seed}, room=data["partner_username"])
 
 @socketio.on('sendChatMessage', namespace='/sock')
 def onSendChatMessage(data):
