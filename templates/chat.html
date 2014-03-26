@@ -19,7 +19,7 @@
 	{
 		var $elem = $('#pesan_body');
 	    var socket = io.connect('http://' + document.domain + ':' + location.port + '/sock');
-		var partner_username, your_username, N;
+		var partner_username, your_username, N = [];
 	    socket.on('balasConnectTrigger', function(msg)
 		{
 			partner_username = $('#partner_username').html();
@@ -28,7 +28,8 @@
 		});
 		socket.on('chatStart', function(msg) 
 		{
-			N = parseInt(msg.seed);
+			N[0] = parseInt(msg.send_seed);
+			N[1] = parseInt(msg.recv_seed);
 			console.log(N);
 			$('#gambar_loading').fadeOut(500, function() {
 				$('#kotak_pesan').fadeIn(500);
@@ -39,6 +40,7 @@
 		{
 			var decrypted = getPlain(msg.message);
 			console.log(decrypted);
+			console.log(N);
 			$('#pesan_body').append('<div class="bs-callout bs-callout-left bs-callout-warning"><h4>'+partner_username+'</h4><p>'+decrypted+'</p></div>');
 			$('html, body').animate({scrollTop: $elem.height()}, 800);
 		});
@@ -48,12 +50,13 @@
 			var plaintext = $('#message_chat').val();
 			var encrypted = getCipher(plaintext);
 			console.log(encrypted);
+			console.log(N);
 			socket.emit('sendChatMessage', {'message': encrypted, 'destination_username':partner_username});
 			$('#message_chat').val('');
 			$('html, body').animate({scrollTop: $elem.height()}, 800);
 			$('#message_chat').focus();
 		}
-	    $('#send').click(function(event) 
+	    $('#send').click(function(event)
 		{
 			sendChat();
 			return false;
@@ -114,8 +117,6 @@
 			var res = [];
 			for (var i = 0; i < s.length; i++)
 				res[i] = s[i].charCodeAt(0);
-			//return [0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff];
-			//return [0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34];
 			return res;
 		}
 		/**
@@ -126,7 +127,10 @@
 		{
 			var res = "";
 			for (var i = 0; i < s.length; i++)
-				res += s[i].toString(16);
+			{
+				var tmp = '0' + s[i].toString(16);
+				res += tmp.substr(tmp.length - 2);
+			}
 			return res;
 		}
 		/**
@@ -147,28 +151,42 @@
 		function fromHexadecimalString(s)
 		{
 			var res = [];
-			for (var i = 0; i < s.length; i++)
-				res[i] = parseInt(s[i], 16);
+			for (var i = 0; i < (s.length >> 1); i++)
+				res[i] = parseInt(s.slice(i << 1, (i + 1) << 1), 16);
 			return res;
 		}
 		/**
-		 * @param {Number} number to be multiplied
-		 * @return {Number} Galois Field (GF) Multiplication with 2
+		 * @param {Number} multiplicand
+		 * @param {Number} multiplier
+		 * @return {Number} Galois Field (GF) Multiplication of n with k
 		 */
-		function multiply2(n)
+		function multiply(n, k)
 		{
-			n <<= 1;
-			if (n & 0x100)
-				return n ^ 0x11B;
-			return n;
-		}
-		/**
-		 * @param {Number} number to be multiplied
-		 * @return {Number} Galois Field (GF) Multiplication with 3
-		 */
-		function multiply3(n)
-		{
-			return n ^ multiply2(n);
+			switch(k)
+			{
+				case 2:
+					n <<= 1;
+					if (n & 0x100)
+						return n ^ 0x11B;
+					return n;
+					break;
+				case 3:
+					return n ^ multiply(n, 2);
+					break;
+				case 9:
+					return n ^ multiply(multiply(multiply(n, 2), 2), 2);
+					break;
+				case 11:
+					return n ^ multiply(n ^ multiply(multiply(n, 2), 2), 2);
+					break;
+				case 13:
+					return n ^ multiply(multiply(n ^ multiply(n, 2), 2), 2);
+					break;
+				case 14:
+					return multiply(n ^ multiply(n ^ multiply(n, 2), 2), 2);
+					break;
+			}
+			return 0;
 		}
 		/**
 		 * @param {Number[]} initial round key
@@ -211,9 +229,12 @@
 		function getCipher(s)
 		{
 			s = toHexadecimal(s);
+			//s = [0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff];
+			//s = [0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34];
 			var res = [];
-			var iv = bbs(nByte);
-			var key = generateRoundKey(bbs(nByte));
+			var iv = bbs(nByte, 0);
+			var key = generateRoundKey(bbs(nByte, 0));
+			//var iv = [];
 			//var key = generateRoundKey([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]);
 			//var key = generateRoundKey([0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c]);
 			var nBlock = s.length / nByte + ((s.length % nByte) ? 1 : 0);
@@ -241,7 +262,31 @@
 		 */
 		function getPlain(s)
 		{
-			return s;
+			/* assert no missing values */
+			if (s.length % (nByte << 1))
+				throw 'Missing Some Values';
+			s = fromHexadecimalString(s);
+			var res = [];
+			var iv = bbs(nByte, 1);
+			var key = generateRoundKey(bbs(nByte, 1));
+			//var iv = [];
+			//var key = generateRoundKey([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]);
+			//var key = generateRoundKey([0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c]);
+			var nBlock = s.length / nByte + ((s.length % nByte) ? 1 : 0);
+			/* run aes decryption for every block */
+			for (var i = 0; i < nBlock; i++)
+			{
+				/* run aes decryption */
+				res = res.concat(decrypt(s.slice(i * nByte, (i + 1) * nByte), key));
+				/* xor with preceding block */
+				for (var j = 0; j < nByte; j++)
+				{
+					res[i * nByte + j] ^= iv[j];
+					iv[j] = s[i * nByte + j];
+				}
+			}
+			res = fromHexadecimal(res);
+			return res;
 		}
 		/**
 		 * @param {Number[]} unicode representation of plain text
@@ -291,10 +336,10 @@
 				if (i < nRound - 1)
 					for (var j = 0; j < col; j++)
 					{
-						state[0][j] = multiply2(tmp[0][j]) ^ multiply3(tmp[1][j]) ^ tmp[2][j] ^ tmp[3][j];
-						state[1][j] = tmp[0][j] ^ multiply2(tmp[1][j]) ^ multiply3(tmp[2][j]) ^ tmp[3][j];
-						state[2][j] = tmp[0][j] ^ tmp[1][j] ^ multiply2(tmp[2][j]) ^ multiply3(tmp[3][j]);
-						state[3][j] = multiply3(tmp[0][j]) ^ tmp[1][j] ^ tmp[2][j] ^ multiply2(tmp[3][j]);
+						state[0][j] = multiply(tmp[0][j], 2) ^ multiply(tmp[1][j], 3) ^ tmp[2][j] ^ tmp[3][j];
+						state[1][j] = tmp[0][j] ^ multiply(tmp[1][j], 2) ^ multiply(tmp[2][j], 3) ^ tmp[3][j];
+						state[2][j] = tmp[0][j] ^ tmp[1][j] ^ multiply(tmp[2][j], 2) ^ multiply(tmp[3][j], 3);
+						state[3][j] = multiply(tmp[0][j], 3) ^ tmp[1][j] ^ tmp[2][j] ^ multiply(tmp[3][j], 2);
 					}
 				/* add round key */
 				for (var j = 0; j < row; j++)
@@ -313,12 +358,68 @@
 		 */
 		function decrypt(s, key)
 		{
+			var col = 4;
+			var row = nByte / col;
+			var res = [];
+			var state = [];
+			/* transform into state array */
+			for (var i = 0; i < row; i++)
+			{
+				state[i] = [];
+				for (var j = 0; j < col; j++)
+					state[i][j] = s[j * row + i];
+			}
+			/* add round key */
+			for (var i = 0; i < row; i++)
+				for (var j = 0; j < col; j++)
+					state[i][j] ^= key[nRound][i][j];
+			for (var i = nRound; i > 0; i--)
+			{
+				/* shift (right) rows */
+				for (var j = 0; j < row; j++)
+				{
+					var tmp = [];
+					for (var k = 0; k < col; k++)
+						tmp[k] = state[j][k];
+					for (var k = 0; k < col; k++)
+						state[j][k] = tmp[(k - j + col) % col];
+				}
+				/* inverse substitute */
+				for (var j = 0; j < row; j++)
+					for (var k = 0; k < col; k++)
+						state[j][k] = iBox[state[j][k]];
+				/* add round key */
+				for (var j = 0; j < row; j++)
+					for (var k = 0; k < col; k++)
+						state[j][k] ^= key[i - 1][j][k];
+				var tmp = [];
+				for (var j = 0; j < row; j++)
+				{
+					tmp[j] = [];
+					for (var k = 0; k < col; k++)
+						tmp[j][k] = state[j][k];
+				}
+				/* mix columns */
+				if (i > 1)
+					for (var j = 0; j < col; j++)
+					{
+						state[0][j] = multiply(tmp[0][j], 0x0E) ^ multiply(tmp[1][j], 0x0B) ^ multiply(tmp[2][j], 0x0D) ^ multiply(tmp[3][j], 0x09);
+						state[1][j] = multiply(tmp[0][j], 0x09) ^ multiply(tmp[1][j], 0x0E) ^ multiply(tmp[2][j], 0x0B) ^ multiply(tmp[3][j], 0x0D);
+						state[2][j] = multiply(tmp[0][j], 0x0D) ^ multiply(tmp[1][j], 0x09) ^ multiply(tmp[2][j], 0x0E) ^ multiply(tmp[3][j], 0x0B);
+						state[3][j] = multiply(tmp[0][j], 0x0B) ^ multiply(tmp[1][j], 0x0D) ^ multiply(tmp[2][j], 0x09) ^ multiply(tmp[3][j], 0x0E);
+					}
+			}
+			for (var i = 0; i < row; i++)
+				for (var j = 0; j < col; j++)
+					res[j * row + i] = state[i][j];
+			return res;
 		}
 		/**
 		 * @param {Number} amount needed
+		 * @param {Number} 0 send, 1 recv
 		 * @return {Number[]} hexadecimal number
 		 */
-		function bbs(n)
+		function bbs(n, k)
 		{
 			var m = 2146918769;
 			var res = [];
@@ -326,8 +427,8 @@
 				res[i] = 0;
 			for (var i = 0; i < (n << 3); i++)
 			{
-				N = N * N % m;
-				res[i >> 3] = (res[i >> 3] << 1) | (N & 1);
+				N[k] = N[k] * N[k] % m;
+				res[i >> 3] = (res[i >> 3] << 1) | (N[k] & 1);
 			}
 			return res;
 		}
