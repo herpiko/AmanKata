@@ -1,4 +1,4 @@
 AmanKata
 ========
 
-Secure Web Based Chat using Flask + JavaScript
+Secure Web Based Chat using <del>Flask</del> Node.js + Express + JavaScript

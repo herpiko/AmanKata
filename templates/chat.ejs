@@ -5,10 +5,10 @@
   <head>
     <title>Chat Sekjar</title>
     <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
-    <script type="text/javascript" src="{{ url_for('static', filename='jquery.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
-	<script type="text/javascript" src="{{ url_for('static', filename='socket.io.min.js') }}"></script>
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <script type="text/javascript" src="/static/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/static/socket.io.min.js"></script>
 	<style>
 		.pagination-centered {
 		  text-align: center;
@@ -18,7 +18,7 @@
 	$(document).ready(function()
 	{
 		var $elem = $('#pesan_body');
-	    var socket = io.connect('http://' + document.domain + ':' + location.port + '/sock');
+	    var socket = io.connect('http://' + document.domain + ':' + location.port);
 		var partner_username, your_username, N = [];
 	    socket.on('balasConnectTrigger', function(msg)
 		{
@@ -35,6 +35,11 @@
 				$('#kotak_pesan').fadeIn(500);
 			});
 			
+		});
+		socket.on('disconnectUser', function(msg)
+		{
+			alert('partner has disconnected');
+			window.location = '/';
 		});
 		socket.on('receiveMessage', function(msg) 
 		{
@@ -507,7 +512,7 @@
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
             </button>
-            <a href="#" class="navbar-brand"><strong>A</strong>man<strong>K</strong>ata - <span id="your_username">{{ your_username }}</span> with <span id="partner_username">{{ partner_username }}</span></a> <!-- USER ID ditampilkan disini -->
+            <a href="#" class="navbar-brand"><strong>A</strong>man<strong>K</strong>ata - <span id="your_username"><%=your_username %></span> with <span id="partner_username"><%=partner_username %></span></a> <!-- USER ID ditampilkan disini -->
           </div>
         </div>
       </div>
