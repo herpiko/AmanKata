@@ -444,7 +444,7 @@
 	
 		  .bs-sidebar.affix {
 		    width: 450px;
-		    padding-left: 20px;
+		    //padding-left: 20px;
 		  }
 		
 
@@ -520,7 +520,7 @@
 		<div class="span12 pagination-centered">
 			Waiting Partner...
 			<br/>
-			<img src="{{ url_for('static', filename='ajax-loader.gif') }}"/>
+			<img src="/static/ajax-loader.gif"/>
 		</div>
 	  </div>
 	 <div id="kotak_pesan" style="display:none">
@@ -533,7 +533,7 @@
 		<span id="scroll_down_here"></span>
 		<div class="col-md-4">
 			<div class="bs-sidebar" id="sidebar" style="border-left: 3px solid #eee;">
-				<div style="padding-top: 20px; padding-bottom: 20px">
+				<div style="padding-left:20px; padding-top: 20px; padding-bottom: 20px">
 					<h2>Chatbox</h2>
 					<p>Send your message here.</p>
 					<textarea class="form-control" id="message_chat" rows="3"  style="width: 350px"></textarea>

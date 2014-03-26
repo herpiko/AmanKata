@@ -105,10 +105,12 @@ io.sockets.on('connection', function(socket) {
 	socket.on('sendChatMessage', function(data) {
 		users[data['destination_username']]['socket'].emit('receiveMessage',{'message':data['message']});
 	});
-	socket.on('disconnect', function() { 
+	socket.on('disconnect', function() {
 		var partners = removeUser(socket);
-		users[partners]['socket'].emit('disconnectUser');
-		removeUser(partners);
+		if (partner[partners]) {
+			users[partners]['socket'].emit('disconnectUser');
+			removeUser(partners);
+		}
 	}) ;
 	
 });
