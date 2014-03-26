@@ -90,16 +90,18 @@ io.sockets.on('connection', function(socket) {
 	socket.emit('balasConnectTrigger');
 	socket.on('balasConnect', function(data) {
 		setSocketUser(data["your_username"], socket);
-		if (!addChat(data["your_username"], data["partner_username"])){
+		if (!addChat(data["your_username"], data["partner_username"])) {
 			var p = 46219;
 			var q = 46451;
+			var m = p * q;
 			var seed = [0, 0];
-			for (var i=0;i<2;i++){
-				while (seed[i] in [0, 1, p, q, p * q])
-					seed[i] = Math.floor((Math.random()*Math.pow(2,31)+2));
+			for (var i = 0; i < 2; i++) {
+				while (seed[i] in [0, 1, p, q])
+					seed[i] = Math.floor(Math.random() * m);
+				seed[i] = seed[i] * seed[i] % m;
 			}
 			socket.emit("chatStart", {"send_seed": seed[0], "recv_seed": seed[1]})
-			users[data['partner_username']]['socket'].emit("chatStart", {"send_seed": seed[1], "recv_seed": seed[0]});	
+			users[data['partner_username']]['socket'].emit("chatStart", {"send_seed": seed[1], "recv_seed": seed[0]});
 		}
 	});
 	socket.on('sendChatMessage', function(data) {
@@ -114,4 +116,3 @@ io.sockets.on('connection', function(socket) {
 	}) ;
 	
 });
-
