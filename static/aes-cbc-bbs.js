@@ -34,6 +34,11 @@ var rCon = [0x8D, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36];
 var nBit = 128;
 var nByte = nBit >> 3;
 var nRound = (nByte / 4) + 6;
+var N = [];
+var setN = function(n, k) 
+{
+	N[k] = n;
+}
 /**
  * @param {String} character representation
  * @return {Number[]} unicode representation

@@ -80,7 +80,7 @@ app.post('/chat', function(req, res) {
 	else {
 		addUser(your_username);
 		partner[your_username] = partner_username;
-		console.log('assert '+ (partner_username in partner && partner[partner_username] != your_username ));
+		console.log('assert '+ partner_username in partner);
 		res.render('chat.ejs', {"your_username": your_username, "partner_username": partner_username});			
 	}
 });

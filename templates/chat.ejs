@@ -20,7 +20,7 @@
 	{
 		var $elem = $('#pesan_body');
 	    var socket = io.connect('http://' + document.domain + ':' + location.port);
-		var partner_username, your_username, N = [];
+		var partner_username, your_username;
 	    socket.on('balasConnectTrigger', function(msg)
 		{
 			partner_username = $('#partner_username').html();
@@ -29,8 +29,8 @@
 		});
 		socket.on('chatStart', function(msg) 
 		{
-			N[0] = parseInt(msg.send_seed);
-			N[1] = parseInt(msg.recv_seed);
+			setN(parseInt(msg.send_seed), 0);
+			setN(parseInt(msg.recv_seed), 1);
 			console.log(N);
 			$('#gambar_loading').fadeOut(500, function() {
 				$('#kotak_pesan').fadeIn(500);
