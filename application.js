@@ -49,6 +49,14 @@ var isUserExist = function(username) {
 	return (username in users); 
 };
 
+var partnerExist = function(username) {
+	for (var user in partner) {
+		if (partner[user] == username)
+			return true;
+	}
+	return false;
+} 
+
 var addChat = function(username1,username2) {
 	if (username1 in chats) {
 		if (username2 in chats[username1])
@@ -62,8 +70,6 @@ var addChat = function(username1,username2) {
 	
 	chats[username1] = {}
 	chats[username1][username2] = {}
-	partner[username1] = username2;
-	partner[username2] = username1; 
 	return true;	
 };
 
@@ -77,10 +83,12 @@ app.post('/chat', function(req, res) {
     console.log(req.body);
 	var your_username = req.body.your_username;
 	var partner_username = req.body.partner_username;
-	if (isUserExist(your_username))
+	if (isUserExist(your_username)||(partner_username in partner && partner[partner_username] != your_username ) || partnerExist(partner_username) )
 		res.redirect(301,'/');
 	else {
 		addUser(your_username);
+		partner[your_username] = partner_username;
+		console.log('assert '+ partner_username in partner);
 		res.render('chat.ejs', {"your_username": your_username, "partner_username": partner_username});			
 	}
 });
