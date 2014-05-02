@@ -3,6 +3,13 @@ AmanKata
 
 Secure Web Based Chat using <del>Flask</del> Node.js + Express + JavaScript
 
+## New in Version 2.0
+
+* Multiuser group chat by default
+* Per user certificate which contains : RSA + DHE public key + some user info
+* User login with private key
+* The point is, it uses key-exchange and message authentication now
+
 ## Dependency
 * Node.js (http://nodejs.org/)
   * Express Framework (http://expressjs.com/)
