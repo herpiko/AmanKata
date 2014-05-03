@@ -140,6 +140,7 @@ The format look like this :
   * Check if there is group session exist for user id who emit this event
 * Output:
   * group[]
+    * group_id
     * group_host_user_id
     * group_guest_user_id[]
 

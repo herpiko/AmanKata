@@ -5,7 +5,6 @@
 
 var http = require('http');
 var express = require('express');
-var model = require('model.js');
 var app = express();
 
 // EXPRESS SETTING
@@ -19,61 +18,15 @@ app.configure(function() {
 var server = app.listen(5000);
 var io = require('socket.io').listen(server);
 
+//HELPER
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 // GLOBAL VARIABLE
+var user_of_socket = {}
 var users = {}
-var chats = {}
-var partner = {}
-
-// DATA VARIABLE MANAGEMENT
-var addUser = function(userName) {
-    users[userName] = {};
-};
-
-var removeUser = function(socket) {
-	var partners;
-	for (var username in users) {
-		if (users[username]["socket"] == socket) {
-			partners = partner[username];
-			delete users[username];
-			delete partner[username];
-			delete chats[username];
-			return partners;
-		}	
-	}
-};
-
-var setSocketUser = function(userName, socket) {
-	users[userName]['socket'] = socket;
-};
-
-var isUserExist = function(username) {
-	return (username in users); 
-};
-
-var partnerExist = function(username) {
-	for (var user in partner) {
-		if (partner[user] == username)
-			return true;
-	}
-	return false;
-} 
-
-var addChat = function(username1,username2) {
-	if (username1 in chats) {
-		if (username2 in chats[username1])
-			return false;
-	}
-
-	if (username2 in chats) {
-		if (username1 in chats[username2])
-			return false;
-	}
-	
-	chats[username1] = {}
-	chats[username1][username2] = {}
-	return true;	
-};
-
+var groups = {}
 
 // ROUTING
 app.get('/', function(req, res) {
@@ -96,26 +49,46 @@ app.post('/chat', function(req, res) {
 
 // SOCKETIO
 io.sockets.on('connection', function(socket) {
-	socket.emit('balasConnectTrigger');
-	socket.on('balasConnect', function(data) {
-		setSocketUser(data["your_username"], socket);
-		if (!addChat(data["your_username"], data["partner_username"])) {
-			var p = 46219;
-			var q = 46451;
-			var m = p * q;
-			var seed = [0, 0];
-			for (var i = 0; i < 2; i++) {
-				while (seed[i] in [0, 1, p, q])
-					seed[i] = Math.floor(Math.random() * m);
-				seed[i] = seed[i] * seed[i] % m;
-			}
-			socket.emit("chatStart", {"send_seed": seed[0], "recv_seed": seed[1]})
-			users[data['partner_username']]['socket'].emit("chatStart", {"send_seed": seed[1], "recv_seed": seed[0]});
+	socket.on('registerUser', function(data, fn) {
+		var cert = data["new_user_certificate"];
+		//sign
+		fn(cert);
+	});
+
+	socket.on('doLogin', function(data, fn) {
+		//check(data["user_id"], data["password"]);
+		fn(true);
+	});
+
+	socket.on('doLoginChat', function(data, fn) {
+		//check(data["user_id"], data["password"]);
+		user_of_socket[socket] = user_id;
+		users[user_id] = {};
+		users[user_id]["socket"] = socket;
+		users[user_id]["groups"] = [];
+		fn(true);
+	});
+
+	socket.on('requestGroupSession', function(fn) {
+		var user = user_of_socket[socket];
+		var user_group = [];
+		for (let group of users[user]["groups"]){
+			user_group.push(group); 
+		}
+		fn(user_group);
+	});
+
+	socket.on('newGroup', function(data) {
+		var new_group = data;
+		var group_id = generate_new_group_key();
+		new_group["group_id"] = group_id;
+		groups[group_id] = new_group;
+		users[data["group_host_user_id"]]["groups"].push(group_id);
+		for (let user of data["group_guest_user_id"]) {
+			users[user].push(group_id);
 		}
 	});
-	socket.on('sendChatMessage', function(data) {
-		users[data['destination_username']]['socket'].emit('receiveMessage',{'message':data['message']});
-	});
+
 	socket.on('disconnect', function() {
 		var partners = removeUser(socket);
 		if (partner[partners]) {
