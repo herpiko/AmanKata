@@ -22,6 +22,15 @@ var io = require('socket.io').listen(server);
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+function generate_new_group_key() {
+	var new_group_key = getRandomInt(1000000,9999999);
+	while (new_group_key in groups)
+	{
+		new_group_key = getRandomInt(1000000,9999999);
+	}
+	return new_group_key;
+}
+function gene
 
 // GLOBAL VARIABLE
 var user_of_socket = {}
@@ -72,7 +81,8 @@ io.sockets.on('connection', function(socket) {
 	socket.on('requestGroupSession', function(fn) {
 		var user = user_of_socket[socket];
 		var user_group = [];
-		for (let group of users[user]["groups"]){
+		for (group_id in users[user]["groups"]){
+			var group = users[user]["groups"][group_id];
 			user_group.push(group); 
 		}
 		fn(user_group);
@@ -84,7 +94,8 @@ io.sockets.on('connection', function(socket) {
 		new_group["group_id"] = group_id;
 		groups[group_id] = new_group;
 		users[data["group_host_user_id"]]["groups"].push(group_id);
-		for (let user of data["group_guest_user_id"]) {
+		for (user_id in data["group_guest_user_id"]) {
+			var user = data["group_guest_user_id"][user_id];
 			users[user].push(group_id);
 		}
 	});
