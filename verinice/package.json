@@ -1,0 +1,11 @@
+{
+  "name": "verinice",
+  "description": "verinice simple certificate authority",
+  "version": "20140503",
+  "private": true,
+  "dependencies": {
+    "socket.io": "0.9.16",
+    "bignumber.js": "1.3.0",
+    
+  }
+}
