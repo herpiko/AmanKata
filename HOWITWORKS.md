@@ -42,9 +42,9 @@ The chat message format look like this :
 * message_cipher_aes
 * message_cipher_rsa
 
-### Client-sided cookie
+### Client-sided HTML5 Storage
 
-Client-sided cookie is used for authentication purposes for client to be connected. When the user opened AmanKatakata and the client-sided cookie is actually exist, the system won't ask anything and just go straight to the dashboard system as logged in user.
+Client-sided HTML5 Storage is used for authentication purposes for client to be connected. When the user opened AmanKatakata and the client-sided HTML5 Storage is actually exist, the system won't ask anything and just go straight to the dashboard system as logged in user.
 
 The format look like this :
 
@@ -59,29 +59,30 @@ The format look like this :
 * He/she provides his/her user id.
 * The client-side JavaScript then take the part :
   * It created a pair of public/private key in DHE/RSA format.
-  * Then it created the certificate, and passess them into VeriNice system (via AmanKatakata server)
+  * Then it created the certificate, and passess them into VeriNice system (via AmanKatakata server) (SocketIO: onRegisterUser)
   * Then the signed certificate passed back into the user.
 * Now the user are provided with a certificate and private key (in copy-able textbox format instead of file), they must reserved it and its user id so he/she can join in system.
 
 ### Login Process (/login)
 
-* Check the client-sided session cookie. If it exist, them just open dashboard page, otherwise go to the next step.
-* When the user facing login page, he/she will provided his/her user id and copy-pasted his/her private key into designated box.
+* Check the client-sided session HTML5 Storage. If it exist, them just open dashboard page, otherwise go to the next step.
+* When the user facing login page, he/she will provided his/her user id, password and copy-pasted his/her private key into designated box.
 * The client-side JavaScript then :
   * Changes to /chat page.
-  * And also save the current user id and private key inside the client-sided session cookie.
+  * And also save the current user id, md5 hashed password and private key inside the client-sided session HTML5 Storage.
 
 ### Chat Page (/chat)
 
-* When there is no client-sided cookie, redirect to /login page, otherwise go to next step
+* When there is no client-sided HTML5 Storage, redirect to /login page, otherwise go to next step
+* When there is a HTML5 Storage, the client-sided JavaScript check if user id and password combination is correct (SocketIO: onDoLogin), when it return false, turn back into /login page
 * The user has two choices : Create a new chat group session and Joined a current established group session.
 
 #### Create a new chat group session
 
 * The user must explicitly click "Create a new Chat Session"
 * Then he/she must provided every single user id who joined this chat session.
-* When it dones, the client sided JavaScript:
-  * Tell the server if there is new Group Session and also tell whoever joining it.
+* When it done, the client sided JavaScript:
+  * Tell the server if there is new Group Session and also tell whoever joining it (SocketIO: onNewGroup).
   * The server will tell newly created group ID
   * Open a new JS tab with new group id and its joining user.
   
@@ -106,7 +107,9 @@ The format look like this :
 
 ### AmanKataKata Server
 #### onRegisterUser
-* Input: new user ID, new user certificate
+* Input: 
+  * new_user_id
+  * new_user_certificate
 * Process:
   * Pass the certificate to VeriNice
   * If the certificated passed back, then save it into database. Otherwise, return null.
@@ -114,6 +117,22 @@ The format look like this :
   * Signed certificate 
   * null --> The certificate can't be signed
 
+#### onDoLogin
+* Input: 
+  * user_id
+  * password_md5
+* Process:
+  * Check in MongoDB if the credential is correct.
+  * If credential correct, remembered the socket object of its newly logged in user id inside local server variable
+* Return: true/false
+
+#### onNewGroup
+* Input:
+  * group_host_user_id
+  * group_guest_user_id[]
+* Process:
+  * Add the newly created group into local server variable
+  
 
 ### Login and Dashboard Page
 ### Chat Page
