@@ -88,7 +88,7 @@ The format look like this :
   
 #### Join Current Established Group Session
 
-* Upon opening /chat page, the client sided JS asks to AmanKatakata server if there are some group from which he/she is joined in it.
+* Upon opening /chat page, the client sided JS asks to AmanKatakata server if there are some group from which he/she is joined in it. (SocketIO: onRequestGroupSession)
 * If there is, open new JS tab for every group session.
  
 
@@ -97,7 +97,7 @@ The format look like this :
 ##### First-time Opened
 
 * It tells to AmanKatakata server if the user who logged in is login in respective group.
-* It request every single certificate of joined user in respective group
+* It request every single certificate of joined user in respective group (SocketIO: onRequestCertificate)
 
 ##### Send Chat
 
@@ -132,7 +132,23 @@ The format look like this :
   * group_guest_user_id[]
 * Process:
   * Add the newly created group into local server variable
+  * Emit onNewGroupClient to client if the user id has associated with its socketIO object
   
+#### onRequestGroupSession
+* Input: -
+* Process:
+  * Check if there is group session exist for user id who emit this event
+* Output:
+  * group[]
+    * group_host_user_id
+    * group_guest_user_id[]
+
+#### onRequestCertificate
+* Input: userID
+* Process:
+  * Read MongoDB database for its user certificate
+* Output:
+  * The certificate of a userID
 
 ### Login and Dashboard Page
 ### Chat Page
