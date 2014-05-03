@@ -30,7 +30,6 @@ function generate_new_group_key() {
 	}
 	return new_group_key;
 }
-function gene
 
 // GLOBAL VARIABLE
 var user_of_socket = {}
@@ -39,21 +38,19 @@ var groups = {}
 
 // ROUTING
 app.get('/', function(req, res) {
-   res.render('index.ejs');
+   res.render('login.ejs');
 });
 
-app.post('/chat', function(req, res) {
-    console.log(req.body);
-	var your_username = req.body.your_username;
-	var partner_username = req.body.partner_username;
-	if (isUserExist(your_username)||(partner_username in partner && partner[partner_username] != your_username ) || partnerExist(partner_username) )
-		res.redirect(301,'/');
-	else {
-		addUser(your_username);
-		partner[your_username] = partner_username;
-		console.log('assert '+ partner_username in partner);
-		res.render('chat.ejs', {"your_username": your_username, "partner_username": partner_username});			
-	}
+app.get('/login', function(req, res) {
+   res.render('login.ejs');
+});
+
+app.get('/register', function(req, res) {
+   res.render('register.ejs');
+});
+
+app.get('/chat', function(req, res) {
+   res.render('chat.ejs');
 });
 
 // SOCKETIO
@@ -71,6 +68,7 @@ io.sockets.on('connection', function(socket) {
 
 	socket.on('doLoginChat', function(data, fn) {
 		//check(data["user_id"], data["password"]);
+		var user_id = data.user_id;
 		user_of_socket[socket] = user_id;
 		users[user_id] = {};
 		users[user_id]["socket"] = socket;
@@ -85,6 +83,10 @@ io.sockets.on('connection', function(socket) {
 			var group = users[user]["groups"][group_id];
 			user_group.push(group); 
 		}
+		user_group = [
+			{'group_id':1212124,'group_host_user_id':'ihe','group_guest_user_id':['haidar','ali','wira']},
+			{'group_id':1343444,'group_host_user_id':'ihe','group_guest_user_id':['haidar','ali','wira']}
+		];
 		fn(user_group);
 	});
 
@@ -101,11 +103,6 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('disconnect', function() {
-		var partners = removeUser(socket);
-		if (partner[partners]) {
-			users[partners]['socket'].emit('disconnectUser');
-			removeUser(partners);
-		}
-	}) ;
-	
+	});
+
 });

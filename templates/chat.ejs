@@ -1,94 +1,26 @@
 <!doctype html>
 
 <html>
-
+  
   <head>
-	<title>Chat Sekjar</title>
+    <title>Chat Sekjar</title>
 	<meta name="viewport" content="width=device-width">
 	<link rel="stylesheet" href="/static/bootstrap.min.css">
 	<script type="text/javascript" src="/static/jquery.min.js"></script>
 	<script type="text/javascript" src="/static/bootstrap.min.js"></script>
 	<script type="text/javascript" src="/static/socket.io.min.js"></script>
 	<script type="text/javascript" src="/static/aes-cbc-bbs.js"></script>
+	<script type="text/javascript" src="/static/jquery.storageapi.min.js"></script>
 	<style>
 		.pagination-centered {
 		  text-align: center;
 		}
-	</style>
-    <script type="text/javascript">
-	$(document).ready(function()
-	{
-		var $elem = $('#pesan_body');
-	    var socket = io.connect('http://' + document.domain + ':' + location.port);
-		var partner_username, your_username;
-	    socket.on('balasConnectTrigger', function(msg)
-		{
-			partner_username = $('#partner_username').html();
-			your_username = $('#your_username').html()
-			socket.emit('balasConnect', {'your_username': your_username,'partner_username': partner_username});
-		});
-		socket.on('chatStart', function(msg) 
-		{
-			setN(parseInt(msg.send_seed), 0);
-			setN(parseInt(msg.recv_seed), 1);
-			console.log(N);
-			$('#gambar_loading').fadeOut(500, function() {
-				$('#kotak_pesan').fadeIn(500);
-			});
-			
-		});
-		socket.on('disconnectUser', function(msg)
-		{
-			alert('partner has disconnected');
-			window.location = '/';
-		});
-		socket.on('receiveMessage', function(msg) 
-		{
-			var decrypted = getPlain(msg.message);
-			console.log(decrypted);
-			console.log(N);
-			$('#pesan_body').append('<div class="bs-callout bs-callout-left bs-callout-warning"><h4>'+partner_username+'</h4><p>'+decrypted+'</p></div>');
-			$('html, body').animate({scrollTop: $elem.height()}, 800);
-		});
-		function sendChat()
-		{
-			$('#pesan_body').append('<div class="bs-callout bs-callout-right bs-callout-info text-right"><h4>you</h4><p>'+$('#message_chat').val()+'</p></div>');
-			var plaintext = $('#message_chat').val();
-			var encrypted = getCipher(plaintext);
-			console.log(encrypted);
-			console.log(N);
-			socket.emit('sendChatMessage', {'message': encrypted, 'destination_username':partner_username});
-			$('#message_chat').val('');
-			$('html, body').animate({scrollTop: $elem.height()}, 800);
-			$('#message_chat').focus();
-		}
-	    $('#send').click(function(event)
-		{
-			sendChat();
-			return false;
-	    });
-		$('#message_chat').keyup(function(event) {
-			if ( event.which == 13 ) {
-				sendChat();
-			}
-		});
-		$('#sidebar').affix(
-		{
-		  offset: {
-		    top: $('.navbar navbar-default').height()
-		  }
-		});
-	});
-	   
-	</script>
-	<style type="text/css">
 	
-		  .bs-sidebar.affix {
-		    width: 450px;
-		    //padding-left: 20px;
-		  }
+	  	.bs-sidebar.affix {
+	    	width: 450px;
+	    	//padding-left: 20px;
+	  	}
 		
-
 		.bs-callout {
 		    margin: 20px 0;
 		    padding: 20px;
@@ -153,40 +85,159 @@
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
             </button>
-            <a href="#" class="navbar-brand"><strong>A</strong>man<strong>K</strong>ata - <span id="your_username"><%=your_username %></span> with <span id="partner_username"><%=partner_username %></span></a> <!-- USER ID ditampilkan disini -->
+            <a href="#" class="navbar-brand"><strong>A</strong>man<strong>K</strong>ata - as initrunlevel0</a>
           </div>
         </div>
       </div>
-	  <div class="row-fluid" id="gambar_loading">
+
+      <div class="row-fluid" id="gambar_loading">
 		<div class="span12 pagination-centered">
 			Waiting Partner...
 			<br/>
 			<img src="/static/ajax-loader.gif"/>
 		</div>
 	  </div>
-	 <div id="kotak_pesan" style="display:none">
-		<div class="col-md-8" id="pesan_body">
-		  <!--div class="alert alert-success text-center">Connected...</div>
-			<table class="table table-responsive" id="chat_body">
-			</table-->
-			
-		</div>
-		<span id="scroll_down_here"></span>
-		<div class="col-md-4">
-			<div class="bs-sidebar" id="sidebar" style="border-left: 3px solid #eee;">
-				<div style="padding-left:20px; padding-top: 20px; padding-bottom: 20px">
-					<h2>Chatbox</h2>
-					<p>Send your message here.</p>
-					<textarea class="form-control" id="message_chat" rows="3"  style="width: 350px"></textarea>
-					<br/>
-					<button id="send" class="btn btn-primary">Send</button>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
 
-    
+      <div class="row" id="main_chat">
+        <div class="col-md-12">
+          <!-- Nav tabs -->
+          <ul id="group_header" class="nav nav-tabs">
+            <li class="active">
+              <a href="#home" data-toggle="tab">Dashboard</a>
+            </li>
+            <li>
+              <a href="#122142412" data-toggle="tab">#122142412</a>
+            </li>
+            <li>
+              <a href="#44" data-toggle="tab">#44</a>
+            </li>
+          </ul>
+          <!-- Tab panes -->
+          <div id="group_content" class="tab-content">
+
+          	<div class="tab-pane active" id="home">
+              <div class="row">
+              	<br>
+                <div class="col-md-9">
+                  Selamat Datang !!!
+                </div>
+                <div class="col-md-3">
+                	<br>
+                  <ul class="list-group">
+                    <li class="list-group-item">initrunlevel0 (On)</li>
+                    <li class="list-group-item">aliariff2013</li>
+                    <li class="list-group-item">haidarmuhammad</li>
+                    <li class="list-group-item">ivanhendrajaya (On)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane" id="122142412">
+              <div class="row">
+                <div class="col-md-9 pesan_body">
+              		<div class="bs-callout bs-callout-left bs-callout-warning"><h4>122142412</h4><p>122142412</p></div>
+              	</div>
+                <div class="col-md-3">
+                  <ul class="list-group">
+                    <li class="list-group-item">initrunlevel0 (On)</li>
+                    <li class="list-group-item">aliariff2013</li>
+                    <li class="list-group-item">haidarmuhammad</li>
+                    <li class="list-group-item">ivanhendrajaya (On)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane" id="44">
+              <div class="row">
+              	<div class="col-md-9 pesan_body">
+              		<div class="bs-callout bs-callout-left bs-callout-warning"><h4>44</h4><p>44</p></div>
+              	</div>
+                <div class="col-md-3">
+                  <ul class="list-group">
+                    <li class="list-group-item">initrunlevel0 (On)</li>
+                    <li class="list-group-item">aliariff2013</li>
+                    <li class="list-group-item">haidarmuhammad</li>
+                    <li class="list-group-item">ivanhendrajaya (On)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+          </div>
+			<p>Send your message here.</p>
+			<textarea class="form-control" id="chat_message" rows="3"  style="width: 75%"></textarea>
+			<br/>
+			<button id="send" class="btn btn-primary">Send</button>
+
+          <br>
+          <a href="/">Do Logout, remove my credentials from HTML5 Storage</a>
+        </div>
+      </div>
+    </div>
   </body>
 
 </html>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+  	
+  	$('#main_chat').hide();
+
+  	var current_group_id, groups;
+  	groups = {};
+
+  	if (!$.localStorage.isEmpty('AmanKataCert')) {
+  		window.location.href = "/";
+  	} else {
+  		var socket = io.connect('http://' + document.domain + ':' + location.port);
+  		var data_storage = $.localStorage.get('AmanKataCert');
+  		//var user_id = data_storage['user_id'];
+  		//var password = data_storage['password'];
+
+  		var user_id = 'ali';
+  		var password = 'ali';
+
+  		socket.emit('doLoginChat', {'user_id': user_id, 'password': password}, function(result) {
+	        if (result) {
+	        	//chat dimulai.
+	        	socket.emit('requestGroupSession', function(result_group) {
+	        		$.each(result_group, function(i, data_group) {
+	        			var data = data_group.group_id;
+	        			groups[data] = data_group;
+	        			$('#group_header').append('<li><a class="group_header_a" data-id="'+data+'" href="#'+data+'" data-toggle="tab">#'+data+'</a></li>');
+	        			$('#group_content').append('<div class="tab-pane" id="'+data+'"><div class="row"><div class="col-md-9" id="'+data+'_group_message"></div><div class="col-md-3"><br><ul class="list-group" id="'+data+'_group_member"></ul></div></div></div>');
+	        		});
+	        		$('.group_header_a').click(function() {
+				  		current_group_id = $(this).data('id');
+				  	});
+	        		$('#gambar_loading').fadeOut(500, function() {
+						$('#main_chat').fadeIn(500);
+					});
+	        	});
+
+	        } else {
+	          //tampilkan pesan error.
+	        }
+		});
+  	}
+
+  	function sendChat(obj) {
+  		socket.emit('sendChat', obj);
+  	}
+
+  	$('#send').click(function() {
+  		var chat_message = $('#chat_message').val();
+  		if (user_id != groups[current_group_id]['group_host_user_id']) {
+  			sendChat({'to':groups[current_group_id]['group_host_user_id'], 'from': user_id, 'group_id': current_group_id, 'the_message': chat_message});
+  		}
+  		$.each(groups[current_group_id]['group_guest_user_id'], function(i, data_group) {
+			if (user_id != data_group) {
+				sendChat({'to':data_group, 'from': user_id, 'group_id': current_group_id, 'the_message': chat_message});
+			}
+		});
+  	});
+
+  });
+</script>

@@ -1,0 +1,83 @@
+<!doctype html>
+
+<html>
+  
+  <head>
+    <title>Login AmanKata</title>
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <script type="text/javascript" src="/static/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/socket.io.min.js"></script>
+    <script type="text/javascript" src="/static/jquery.storageapi.min.js"></script>
+  </head>
+  
+  <body>
+    <div class="container">
+      <div class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand"><strong>A</strong>man<strong>K</strong>ata</a>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8">
+          <h1>AmanKata <small>Securely Encrypted Chat Framework</small></h1>
+          <p>Welcome to AmanKata, the greatest anonymous group chat framework that can make your conversation between your friend, secret service, and drug dealer become very safe and secure.</p>
+        </div>
+        <div class="col-md-4 well">
+      	  <form class="form">
+                <h2>Login Now</h2>
+                <p>Enter your user id, password and pass your secret private key here.</p>
+                <input type="text" id="user_id" class="form-control" placeholder="User ID">
+                <br/>
+                <input type="text" id="password" class="form-control" placeholder="Password">
+                <br/>
+                <textarea class="form-control" id="private_key" placeholder="Your Private Key"></textarea>
+                <br/>
+                <button id="login" type"button" class="btn btn-primary">Login</button>
+      	       <p>If you don't have any credentials, <a href="/register">Please register</a> for just an half minute.</p>
+      	  </form>        
+      	</div>
+      </div>
+    </div>
+  </body>
+
+</html>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    $('#login').click(function() {
+      var user_id = $('#user_id').val();
+      var password = $('#password').val();
+      var private_key = $('#private_key').val();
+      
+      // hash password disini !!!
+
+      socket.emit('doLogin', {'user_id': user_id, 'password': password}, function(result) {
+        if (result) {
+          data_storage = {
+            'user_id': user_id,
+            'password': password,
+            'private_key': private_key
+          };
+          //simpan ke storage & redirect ke chat.
+          $.localStorage.set('AmanKataCert', data_storage);
+          window.location.href = "/chat";
+        } else {
+          //tampilkan pesan error.
+
+        }
+      });
+
+    });
+
+  });
+</script>
