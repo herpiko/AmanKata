@@ -2,7 +2,6 @@
  * Dibuat atas dasar kegalauan oleh manusia.
  */
 
-
 var http = require('http');
 var express = require('express');
 var app = express();
@@ -22,13 +21,16 @@ var io = require('socket.io').listen(server);
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-function generate_new_group_key() {
+function generateGroupKey() {
 	var new_group_key = getRandomInt(1000000,9999999);
 	while (new_group_key in groups)
 	{
 		new_group_key = getRandomInt(1000000,9999999);
 	}
 	return new_group_key;
+}
+function checkUserValid(user) {
+	return (user in users);
 }
 
 // GLOBAL VARIABLE
@@ -90,9 +92,23 @@ io.sockets.on('connection', function(socket) {
 		fn(user_group);
 	});
 
-	socket.on('newGroup', function(data) {
+	socket.on('newGroup', function(data, fn) {
+		boolean invalid_user = false;
+		for (user_id in data["group_guest_user_id"]) {
+			var user = data["group_guest_user_id"][user_id];
+			if (!checkUserValid(user))
+			{
+				invalid_user = true;
+				break;
+			}
+		}
+		if (invalid_user)
+		{	
+			fn(false);
+			return;
+		}
 		var new_group = data;
-		var group_id = generate_new_group_key();
+		var group_id = generateGroupKey();
 		new_group["group_id"] = group_id;
 		groups[group_id] = new_group;
 		users[data["group_host_user_id"]]["groups"].push(group_id);
@@ -100,6 +116,11 @@ io.sockets.on('connection', function(socket) {
 			var user = data["group_guest_user_id"][user_id];
 			users[user].push(group_id);
 		}
+		fn(true);
+	});
+
+	socket.on('sendChat', function(data) {
+		users[data['to_id']]['socket'].emit('retrieveChatClient',data);
 	});
 
 	socket.on('disconnect', function() {
