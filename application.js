@@ -5,6 +5,7 @@
 
 var http = require('http');
 var express = require('express');
+var model = require('model.js');
 var app = express();
 
 // EXPRESS SETTING

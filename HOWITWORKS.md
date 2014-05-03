@@ -106,7 +106,7 @@ The format look like this :
 ## The SocketIO Protocol
 
 ### AmanKataKata Server
-#### onRegisterUser
+#### registerUser
 * Input: 
   * new_user_id
   * new_user_certificate
@@ -117,7 +117,7 @@ The format look like this :
   * Signed certificate 
   * null --> The certificate can't be signed
 
-#### onDoLogin
+#### doLogin
 * Input: 
   * user_id
   * password_md5
@@ -126,15 +126,15 @@ The format look like this :
   * If credential correct, remembered the socket object of its newly logged in user id inside local server variable
 * Return: true/false
 
-#### onNewGroup
+#### newGroup
 * Input:
   * group_host_user_id
   * group_guest_user_id[]
 * Process:
   * Add the newly created group into local server variable
-  * Emit onNewGroupClient to client if the user id has associated with its socketIO object
+  * Emit newGroupClient to client if the user id has associated with its socketIO object
   
-#### onRequestGroupSession
+#### requestGroupSession
 * Input: -
 * Process:
   * Check if there is group session exist for user id who emit this event
@@ -143,25 +143,25 @@ The format look like this :
     * group_host_user_id
     * group_guest_user_id[]
 
-#### onRequestCertificate
+#### requestCertificate
 * Input: userID
 * Process:
   * Read MongoDB database for its user certificate
 * Output:
   * The certificate of a userID
 
-#### onTellLogin
+#### tellLogin
 * Input: group_id
 * Process:
-  * emit "onTellLoginClient" for every connected client with user_id and its group_id
+  * emit "tellLoginClient" for every connected client with user_id and its group_id
 * Output: -
 
-#### onSendChat
+#### sendChat
 * Input:
   * group_id
   * the_message
 * Process:
-  * Emit "onRetrieveChatClient" on every logged in client with designated message
+  * Emit "retrieveChatClient" on every logged in client with designated message
 * Output:
   * -
 
