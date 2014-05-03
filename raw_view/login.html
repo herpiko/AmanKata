@@ -1,0 +1,46 @@
+<!doctype html>
+
+<html>
+  
+  <head>
+    <title>Jumbotron</title>
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script type="text/javascript" src="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+
+  </head>
+  
+  <body>
+    <div class="container">
+      <div class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+            </button>
+            <a href="#" class="navbar-brand"><strong>A</strong>man<strong>K</strong>ata</a>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8">
+          <h1>AmanKata <small>Securely Encrypted Chat Framework</small></h1>
+          <p>Welcome to AmanKata, the greatest anonymous group chat framework that can make your conversation between your friend, secret service, and drug dealer become very safe and secure.</p>
+        </div>
+        <div class="col-md-4 well">
+	  <form class="form" action="/chat" method="POST" >
+          <h2>Join Now</h2>
+          <p>Enter your user id, password and pass your secret private key here.</p>
+          <input type="text" name="your_username" class="form-control" placeholder="User ID">
+          <input type="text" name="partner_username" class="form-control" placeholder="Password">
+          <textarea class="form-control" placeholder="Your Private Key"></textarea>
+          <button type"submit" class="btn btn-primary">Login</button>
+	  <p>If you don't have any credentials, <a href="#">Please register</a> for just an half minute.</p>
+	  </form>        
+	</div>
+      </div>
+    </div>
+  </body>
+
+</html>
