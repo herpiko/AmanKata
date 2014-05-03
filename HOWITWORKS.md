@@ -96,12 +96,12 @@ The format look like this :
 
 ##### First-time Opened
 
-* It tells to AmanKatakata server if the user who logged in is login in respective group.
+* It tells to AmanKatakata server if the user who logged in is login in respective group (SocketIO: onTellLogin).
 * It request every single certificate of joined user in respective group (SocketIO: onRequestCertificate)
 
 ##### Send Chat
 
-* For every other user (beside himself/herself) who joined in a group, send a message with encryption.
+* For every other user (beside himself/herself) who joined in a group, send a message with encryption (SocketIO: onSendChat).
 
 ## The SocketIO Protocol
 
@@ -149,6 +149,21 @@ The format look like this :
   * Read MongoDB database for its user certificate
 * Output:
   * The certificate of a userID
+
+#### onTellLogin
+* Input: group_id
+* Process:
+  * emit "onTellLoginClient" for every connected client with user_id and its group_id
+* Output: -
+
+#### onSendChat
+* Input:
+  * group_id
+  * the_message
+* Process:
+  * Emit "onRetrieveChatClient" on every logged in client with designated message
+* Output:
+  * -
 
 ### Login and Dashboard Page
 ### Chat Page
