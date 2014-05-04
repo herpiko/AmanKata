@@ -90,9 +90,11 @@ io.sockets.on('connection', function(socket) {
 
 	socket.on('doLogin', function(data, fn) {
         // Verify if the credential are correct
-        // TODO: STUB
 		//check(data["user_id"], data["password"]);
-		fn(true);
+
+        model.checkUser(data, function(result) {
+            fn(result);
+        });
 	});
 
     // TODO: What is doLoginChat? I can't see it in the specification -- initrunlevel0
@@ -121,7 +123,7 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('newGroup', function(data, fn) {
-		boolean invalid_user = false;
+		var invalid_user = false;
 		for (user_id in data["group_guest_user_id"]) {
 			var user = data["group_guest_user_id"][user_id];
 			if (!checkUserValid(user))
@@ -148,8 +150,11 @@ io.sockets.on('connection', function(socket) {
 	});
 
     socket.on('requestCertificate', function(data, fn) {
-        // TODO: Read database, check for its certificate
-        fn(null);
+        model.getUser(data, function(result) {
+            fn(result["certificate"]);
+        }, function() {
+            fn(null);
+        });
     });
 
     socket.on('tellLogin', function(data) {

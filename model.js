@@ -44,7 +44,10 @@ db.on('error', console.error.bind(console, 'connection error:'));
 	module.exports.getUser = function(user_id, fn, fn_error) {
 		User.findOne( {'user_id' : user_id}, function (err, User) {
 			if (err) fn_error();
-            else fn(User);
+            else {
+                if(User != null) fn_error();
+                else fn(User);
+            };
 		});
 	};
 //});
