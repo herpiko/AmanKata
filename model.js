@@ -7,9 +7,9 @@ module.exports.is_connected = false;
 
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
+//db.once('open', function() {
     module.exports.is_connected = true;
-	var userSchema = mongoose.Schema({
+	var userSchema = new mongoose.Schema({
 		user_id: String,
 		password: String,
 		certificate: String
@@ -32,9 +32,12 @@ db.once('open', function() {
 	};
 
 	module.exports.checkUser = function(data, fn) {
-        User.findOne({'userId': data['user_id'], 'password': data['password']}, function(err, User) {
+        User.findOne({'user_id': data['user_id'], 'password': data['password']}, function(err, User) {
 			if (err) fn(false);
-            else fn(true);
+            else {
+                if(User != null) fn(true);
+                else fn(false);
+            };
         });
 	};
 
@@ -44,4 +47,4 @@ db.once('open', function() {
             else fn(User);
 		});
 	};
-});
+//});

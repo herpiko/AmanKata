@@ -1,4 +1,4 @@
-var BigNumber = require("./bignumber")
+var BigNumber = require("bignumber.js")
 
 module.exports.signCertificate = function(unsignedCertificate, callback) {
     var result = "abcdefghijklmnopqrstuvwxyz";

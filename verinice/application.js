@@ -1,6 +1,6 @@
 /*
  * VeriNice simple Digital Certficate Authority
- * 
+ *
  * Putu Wiramaswara Widya <wiramaswara11@mhs.if.its.ac.id>
  */
 
@@ -14,7 +14,7 @@ io.sockets.on('connection', function (socket) {
             fn(result);
         });
     });
-    
+
     // verifyCertificate
     socket.on("verifyCertificate", function(data, fn) {
         rsaSingator.verifyCertificate(data, function(result) {
