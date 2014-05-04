@@ -142,7 +142,9 @@ The format look like this :
   * group[]
     * group_id
     * group_host_user_id
+    * group_host_certificate
     * group_guest_user_id[]
+    * group_guest_user_certificate[]
 
 #### requestCertificate
 * Input: userID
