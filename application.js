@@ -96,7 +96,7 @@ io.sockets.on('connection', function(socket) {
 		user_of_socket[socket] = user_id;
 		users[user_id] = {};
 		users[user_id]["socket"] = socket;
-		users[user_id]["groups"] = [];
+		users[user_id]["groups"] = []; // Why we have to track group of each user here? -- initrunlevel0
 		fn(true);
 	});
 
