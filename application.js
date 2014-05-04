@@ -8,6 +8,7 @@ var verinice_path = "http://localhost:9999"
 var http = require('http');
 var express = require('express');
 var app = express();
+var model = require('./model');
 
 // EXPRESS SETTING
 app.configure(function() {
@@ -70,14 +71,19 @@ io.sockets.on('connection', function(socket) {
         verinice_sock.on('connect', function() {
             verinice_sock.emit("signThisCertificate", unsigned_cert, function(result) {
                 // Add to database
-                // TODO: Model belum ada
-
-                // Return the signed one to callback
-                fn(result);
+                var new_user = {"user_id": "sopo", "password": "opo", "certificate": result};
+                model.registerUser(data, function() {
+                    // Return the signed one
+                    fn(result);
+                    return;
+                }, function() {
+                    // If error occur when adding, also return null
+                    fn(null);
+                });
             });
         });
         verinice_sock.on('connect_failed', function() {
-            // Return null to callback
+            // If connection to verinice occur, return callback with null
             fn(null);
         });
 	});
@@ -140,6 +146,15 @@ io.sockets.on('connection', function(socket) {
 		}
 		fn(true);
 	});
+
+    socket.on('requestCertificate', function(data, fn) {
+        // TODO: Read database, check for its certificate
+        fn(null);
+    });
+
+    socket.on('tellLogin', function(data) {
+        // TODO: emit "tellLoginClient" to every user of this group_id beside himself
+    });
 
 	socket.on('sendChat', function(data) {
 		users[data['to_id']]['socket'].emit('retrieveChatClient',data);
