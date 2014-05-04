@@ -1,7 +1,7 @@
 var BigNumber = require("./bignumber")
 
 module.exports.signCertificate = function(unsignedCertificate, callback) {
-    var result = "";
+    var result = "abcdefghijklmnopqrstuvwxyz";
     // Stub
     callback(result);
 };

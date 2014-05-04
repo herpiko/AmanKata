@@ -2,6 +2,9 @@
  * Dibuat atas dasar kegalauan oleh manusia.
  */
 
+/* Path to verinice */
+var verinice_path = "http://localhost:9999"
+
 var http = require('http');
 var express = require('express');
 var app = express();
@@ -17,11 +20,12 @@ app.configure(function() {
 var server = app.listen(5000);
 var io = require('socket.io').listen(server);
 
-//HELPER
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+// HELPER FUNCTION
+var getRandomInt = function(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-function generateGroupKey() {
+
+var generateGroupKey = function() {
 	var new_group_key = getRandomInt(1000000,9999999);
 	while (new_group_key in groups)
 	{
@@ -29,6 +33,7 @@ function generateGroupKey() {
 	}
 	return new_group_key;
 }
+
 function checkUserValid(user) {
 	return (user in users);
 }
@@ -58,16 +63,33 @@ app.get('/chat', function(req, res) {
 // SOCKETIO
 io.sockets.on('connection', function(socket) {
 	socket.on('registerUser', function(data, fn) {
-		var cert = data["new_user_certificate"];
-		//sign
-		fn(cert);
+		var unsigned_cert = data["new_user_certificate"];
+
+        // Do connection to Verinice
+        var verinice_sock = io.connect(verinice_path);
+        verinice_sock.on('connect', function() {
+            verinice_sock.emit("signThisCertificate", unsigned_cert, function(result) {
+                // Add to database
+                // TODO: Model belum ada
+
+                // Return the signed one to callback
+                fn(result);
+            });
+        });
+        verinice_sock.on('connect_failed', function() {
+            // Return null to callback
+            fn(null);
+        });
 	});
 
 	socket.on('doLogin', function(data, fn) {
+        // Verify if the credential are correct
+        // TODO: STUB
 		//check(data["user_id"], data["password"]);
 		fn(true);
 	});
 
+    // TODO: What is doLoginChat? I can't see it in the specification -- initrunlevel0
 	socket.on('doLoginChat', function(data, fn) {
 		//check(data["user_id"], data["password"]);
 		var user_id = data.user_id;
@@ -83,7 +105,7 @@ io.sockets.on('connection', function(socket) {
 		var user_group = [];
 		for (group_id in users[user]["groups"]){
 			var group = users[user]["groups"][group_id];
-			user_group.push(group); 
+			user_group.push(group);
 		}
 		user_group = [
 			{'group_id':1212124,'group_host_user_id':'ihe','group_guest_user_id':['haidar','ali','wira']},
@@ -103,7 +125,7 @@ io.sockets.on('connection', function(socket) {
 			}
 		}
 		if (invalid_user)
-		{	
+		{
 			fn(false);
 			return;
 		}
