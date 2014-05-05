@@ -8,6 +8,7 @@
     "ejs": "~0.7.1",
     "socket.io": "0.9.16",
     "mongoose": "3.8",
-    "async" : "0.8.0"
+    "async" : "0.8.0",
+    "socket.io-client": "0.9.16"
   }
 }

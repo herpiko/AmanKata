@@ -60,23 +60,14 @@
       var private_key = $('#private_key').val();
       
       // hash password disini !!!
-
-      socket.emit('doLogin', {'user_id': user_id, 'password': password}, function(result) {
-        if (result) {
-          data_storage = {
-            'user_id': user_id,
-            'password': password,
-            'private_key': private_key
-          };
-          //simpan ke storage & redirect ke chat.
-          $.localStorage.set('AmanKataCert', data_storage);
-          window.location.href = "/chat";
-        } else {
-          //tampilkan pesan error.
-
-        }
-      });
-
+      data_storage = {
+        'user_id': user_id,
+        'password': password,
+        'private_key': private_key
+      };
+      //simpan ke storage & redirect ke chat.
+      $.localStorage.set('AmanKataCert', data_storage);
+      window.location.href = "/chat";
     });
 
   });

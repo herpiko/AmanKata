@@ -47,10 +47,10 @@
               <strong>Your Registration is Success</strong>
               <br/>
               Here is your certificate data : 
-              <div id="cert_data" class="over-text">12345
+              <div id="cert_data" class="over-text">
               </div>
               Here is your private key (safe it in the safest place on earth that only you know it) : 
-              <div id="private_key" class="over-text">xcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyuxcvfrtyu
+              <div id="private_key" class="over-text">
               </div>
             </div>
             <!-- Kalau pendaftarannya gagal (SocketIO returnnya null) -->
@@ -82,10 +82,13 @@
       $('#success_message').show();
       var user_id = $('#user_id').val();
       var password = $('#password').val();
-      socket.emit('registerUser', {'new_user_id': user_id, 'new_password': password, 'new_user_certificate': 'abc'}, function(result) {
+      socket.emit('registerUser', {'user_id': user_id, 'password': password, 'user_certificate': 'abc'}, function(result) {
         closeMessage();
+        alert(result);
         if (result) {
           // tampilkan informasi private key dll.
+          $('#cert_data').text(result);
+          $('#private_key').text("asalalalala");
           $('#success_message').show();
         } else {
           $('#error_message').show();

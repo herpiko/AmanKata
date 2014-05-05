@@ -182,7 +182,7 @@
   		var user_id = 'ali';
   		var password = 'ali';
 
-  		socket.emit('doLoginChat', {'user_id': user_id, 'password': password}, function(result) {
+  		socket.emit('doLogin', {'user_id': user_id, 'password': password}, function(result) {
 	        if (result) {
 	        	//chat dimulai.
 	        	socket.emit('requestGroupSession', function(result_group) {
@@ -206,7 +206,9 @@
 	        	});
 
 	        } else {
-	          //tampilkan pesan error.
+	        	$.localStorage.removeAll();
+	        	alert('Error!');
+	        	window.location.href = "/";
 	        }
 		});
   	}
@@ -242,9 +244,25 @@
   	});
 
   	$('#start_group_chat').click(function() {
+  		var size = $("#list_user_id li").length;
+  		if (size < 2) {
+  			alert("Chat Minimal 2 User");
+  			return;
+  		}
+  		var group_members = [];
   		$( "#list_user_id li" ).each(function() {
-			console.log($( this ).text());
+  			group_members.push($( this ).text());
+			//console.log($( this ).text());
 		});
+		socket.emit("newGroup", group_members, function(result) {
+			if (result) {
+				alert("Group Created");
+			} else {
+				alert("Group Failed to Create");
+			}
+			$('#create_group_modal').modal('hide');
+		});
+		console.log(group_members);
   	});
 
   });
