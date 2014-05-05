@@ -55,7 +55,7 @@ var checkValidityAllUser = function(user_list, fn) {
 	for (i in user_list) {
 		var user = user_list[i];
 		model.getUser(user, function(result) {
-			
+
 		}, function() {
 			fn(false);
 			return;
@@ -94,8 +94,8 @@ io.sockets.on('connection', function(socket) {
 		var unsigned_cert = data["user_certificate"];
 
         // Do connection to Verinice
-        var verinice_sock = io_client.connect(verinice_path);
-        //verinice_sock.on('connect', function() {
+        var verinice_sock = io_client.connect(verinice_path,  { 'force new connection': true });
+        verinice_sock.on('connect', function() {
             verinice_sock.emit("signThisCertificate", unsigned_cert, function(result) {
                 // Add to database
                 var new_user = {"user_id": data["user_id"], "password": data[
@@ -103,15 +103,17 @@ io.sockets.on('connection', function(socket) {
                 model.registerUser(new_user, function() {
                     // Return the signed one
                     fn(result);
-                    return;
+                    verinice_sock.disconnect();
                 }, function() {
                     // If error occur when adding, also return null
+                    verinice_sock.disconnect();
                     fn(null);
                 });
             });
-        //});
+        });
         verinice_sock.on('connect_failed', function() {
             // If connection to verinice occur, return callback with null
+            verinice_sock.disconnect();
             fn(null);
         });
 	});
@@ -151,7 +153,7 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('newGroup', function(data, fn) {
-		
+
 		var new_group = data;
 		var group_id = generateGroupKey();
 		new_group["group_id"] = group_id;
