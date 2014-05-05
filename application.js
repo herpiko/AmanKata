@@ -35,8 +35,34 @@ var generateGroupKey = function() {
 	return new_group_key;
 }
 
-function checkUserValid(user) {
-	return (user in users);
+var initializeUser = function(user_id) {
+	user_of_socket[socket] = user_id;
+	users[user_id] = {};
+	users[user_id]["socket"] = socket;
+	users[user_id]["groups"] = [];
+}
+
+var checkUserValid = function(user_id, fn, fn_error) {
+	model.getUser(data, function(result) {
+            fn();
+        }, function(result){
+        	fn(false);
+        });
+}
+
+var checkValidityAllUser = function(user_list, fn) {
+	for (i in user_list) {
+		var user = user_list[i];
+		model.getUser(user, function(result) {
+			
+		}, function() {
+			fn(false);
+			return;
+		});
+	}
+	fn(true);
+	return;
+
 }
 
 // GLOBAL VARIABLE
@@ -71,8 +97,9 @@ io.sockets.on('connection', function(socket) {
         verinice_sock.on('connect', function() {
             verinice_sock.emit("signThisCertificate", unsigned_cert, function(result) {
                 // Add to database
-                var new_user = {"user_id": "sopo", "password": "opo", "certificate": result};
-                model.registerUser(data, function() {
+                var new_user = {"user_id": data["user_id"], "password": data[
+                "password"], "certificate": result};
+                model.registerUser(new_user, function() {
                     // Return the signed one
                     fn(result);
                     return;
@@ -88,24 +115,25 @@ io.sockets.on('connection', function(socket) {
         });
 	});
 
-	socket.on('doLogin', function(data, fn) {
+	/*socket.on('doLogin', function(data, fn) {
         // Verify if the credential are correct
 		//check(data["user_id"], data["password"]);
 
         model.checkUser(data, function(result) {
             fn(result);
         });
-	});
+	});*/
 
     // TODO: What is doLoginChat? I can't see it in the specification -- initrunlevel0
-	socket.on('doLoginChat', function(data, fn) {
-		//check(data["user_id"], data["password"]);
-		var user_id = data.user_id;
-		user_of_socket[socket] = user_id;
-		users[user_id] = {};
-		users[user_id]["socket"] = socket;
-		users[user_id]["groups"] = []; // Why we have to track group of each user here? -- initrunlevel0
-		fn(true);
+	socket.on('doLogin', function(data, fn) {
+		model.getUser(data, function(result) {
+            var user_id = data.user_id;
+			initializeUser(user_id);
+			fn(true);
+        }, function() {
+        	fn(false);
+        });
+		
 	});
 
 	socket.on('requestGroupSession', function(fn) {
@@ -115,28 +143,15 @@ io.sockets.on('connection', function(socket) {
 			var group = users[user]["groups"][group_id];
 			user_group.push(group);
 		}
-		user_group = [
+		/*user_group = [
 			{'group_id':1212124,'group_host_user_id':'ihe','group_guest_user_id':['haidar','ali','wira']},
 			{'group_id':1343444,'group_host_user_id':'ihe','group_guest_user_id':['haidar','ali','wira']}
-		];
+		];*/
 		fn(user_group);
 	});
 
 	socket.on('newGroup', function(data, fn) {
-		var invalid_user = false;
-		for (user_id in data["group_guest_user_id"]) {
-			var user = data["group_guest_user_id"][user_id];
-			if (!checkUserValid(user))
-			{
-				invalid_user = true;
-				break;
-			}
-		}
-		if (invalid_user)
-		{
-			fn(false);
-			return;
-		}
+		
 		var new_group = data;
 		var group_id = generateGroupKey();
 		new_group["group_id"] = group_id;

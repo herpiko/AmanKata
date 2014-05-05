@@ -23,9 +23,6 @@ db.on('error', console.error.bind(console, 'connection error:'));
 			certificate: data['certificate']
 		});
 		user.save(function (err, user) {
-            /*
-             * OK Haidar, so there is two callback for this function: The one IF there is no error, and the other if it does
-             */
 			if (err) fn_error();
             else fn();
 		});
@@ -45,9 +42,23 @@ db.on('error', console.error.bind(console, 'connection error:'));
 		User.findOne( {'user_id' : user_id}, function (err, User) {
 			if (err) fn_error();
             else {
-                if(User != null) fn_error();
+                if(User == null) fn_error();
                 else fn(User);
             };
 		});
 	};
+
+	module.exports.checkUsersList = function(users_list, fn) {
+		var result = true;
+		for (i in users_list) {
+			(function(i) { 
+				User.findOne({'user_id': users_list[i]}, function(err, User) {
+					if (User = null) {
+						result = false;
+					}
+				});
+			})(i);
+		}
+		fn(result);
+	}
 //});
