@@ -20,6 +20,7 @@ app.configure(function() {
 
 var server = app.listen(5000);
 var io = require('socket.io').listen(server);
+var io_client = require('socket.io-client');
 
 // HELPER FUNCTION
 var getRandomInt = function(min, max) {
@@ -90,11 +91,11 @@ app.get('/chat', function(req, res) {
 // SOCKETIO
 io.sockets.on('connection', function(socket) {
 	socket.on('registerUser', function(data, fn) {
-		var unsigned_cert = data["new_user_certificate"];
+		var unsigned_cert = data["user_certificate"];
 
         // Do connection to Verinice
-        var verinice_sock = io.connect(verinice_path);
-        verinice_sock.on('connect', function() {
+        var verinice_sock = io_client.connect(verinice_path);
+        //verinice_sock.on('connect', function() {
             verinice_sock.emit("signThisCertificate", unsigned_cert, function(result) {
                 // Add to database
                 var new_user = {"user_id": data["user_id"], "password": data[
@@ -108,7 +109,7 @@ io.sockets.on('connection', function(socket) {
                     fn(null);
                 });
             });
-        });
+        //});
         verinice_sock.on('connect_failed', function() {
             // If connection to verinice occur, return callback with null
             fn(null);
