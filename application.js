@@ -36,7 +36,7 @@ var generateGroupKey = function() {
 	return new_group_key;
 }
 
-var initializeUser = function(user_id) {
+var initializeUser = function(user_id, socket) {
 	user_of_socket[socket] = user_id;
 	users[user_id] = {};
 	users[user_id]["socket"] = socket;
@@ -127,14 +127,13 @@ io.sockets.on('connection', function(socket) {
 
     // TODO: What is doLoginChat? I can't see it in the specification -- initrunlevel0
 	socket.on('doLogin', function(data, fn) {
-		model.getUser(data, function(result) {
-            var user_id = data.user_id;
-			initializeUser(user_id);
-			fn(true);
-        }, function() {
-        	fn(false);
+		model.checkUser(data, function(result) {
+			if (result) {
+				var user_id = data.user_id;
+				initializeUser(user_id, socket);
+			}
+			fn(result);
         });
-		
 	});
 
 	socket.on('requestGroupSession', function(fn) {
