@@ -85,14 +85,14 @@
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
             </button>
-            <a href="#" class="navbar-brand"><strong>A</strong>man<strong>K</strong>ata - as initrunlevel0</a>
+            <a href="#" class="navbar-brand"><strong>A</strong>man<strong>K</strong>ata - as <span id="tag_user_id"></span></a>
           </div>
         </div>
       </div>
 
       <div class="row-fluid" id="gambar_loading">
 		<div class="span12 pagination-centered">
-			Waiting Partner...
+			Loading...
 			<br/>
 			<img src="/static/ajax-loader.gif"/>
 		</div>
@@ -126,7 +126,7 @@
 		  </div>
 
           <br>
-          <a href="/">Do Logout, remove my credentials from HTML5 Storage</a>
+          <a href="/" id="logout">Do Logout, remove my credentials from HTML5 Storage</a>
         </div>
       </div>
     </div>
@@ -168,20 +168,21 @@
   	$('#main_chat').hide();
   	$('#chat_bar').hide();
 
-  	var current_group_id, groups;
+  	var current_group_id, groups, data_storage, user_id, password;
   	groups = {};
 
   	if ($.localStorage.isEmpty('AmanKataCert')) {
   		window.location.href = "/";
   	} else {
   		var socket = io.connect('http://' + document.domain + ':' + location.port);
-  		var data_storage = $.localStorage.get('AmanKataCert');
-  		var user_id = data_storage['user_id'];
-  		var password = data_storage['password'];
+  		data_storage = $.localStorage.get('AmanKataCert');
+  		user_id = data_storage['user_id'];
+  		password = data_storage['password'];
 
   		socket.emit('doLogin', {'user_id': user_id, 'password': password}, function(result) {
 	        if (result) {
 	        	//chat dimulai.
+	        	$('#tag_user_id').text(user_id);
 	        	socket.emit('requestGroupSession', function(result_group) {
 	        		$.each(result_group, function(i, data_group) {
 	        			var data = data_group.group_id;
@@ -246,20 +247,26 @@
   			alert("Chat Minimal 2 User");
   			return;
   		}
-  		var group_members = [];
+  		var data_group = {
+  			'group_host_user_id' : user_id,
+  			'group_guest_user_id' : []
+  		};
   		$( "#list_user_id li" ).each(function() {
-  			group_members.push($( this ).text());
-			//console.log($( this ).text());
+  			data_group['group_guest_user_id'].push($( this ).text());
 		});
-		socket.emit("newGroup", group_members, function(result) {
+		socket.emit("newGroup", data_group, function(result) {
 			if (result) {
 				alert("Group Created");
+				window.location.href = "/chat";
 			} else {
 				alert("Group Failed to Create");
 			}
 			$('#create_group_modal').modal('hide');
 		});
-		console.log(group_members);
+  	});
+
+  	$('#logout').click(function() {
+  		$.localStorage.removeAll();
   	});
 
   });
