@@ -53,9 +53,25 @@ db.on('error', console.error.bind(console, 'connection error:'));
 		var result = true;
         var function_list = [];
 		for (i in users_list) {
-            function_list.push(function() {
-
+            function_list.push(function(callback) {
+            	User.findOne( {'user_id': users_list[i]}, function (err, User) {
+            		if (err)
+            			callback(null, false);
+            		else {
+            			if (User == null) callback(null, false);
+            			else callback(null, true);
+            		}
+            	});
             });
         }
+        async.parallel(function_list, function(err, results){
+        	for (i in results) {
+        		if (results[i]== false){
+        			fn(false);
+        			return;
+        		}
+        	}
+        	fn(true);
+        });
 	}
 //});

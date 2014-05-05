@@ -127,7 +127,7 @@ io.sockets.on('connection', function(socket) {
 
     // TODO: What is doLoginChat? I can't see it in the specification -- initrunlevel0
 	socket.on('doLogin', function(data, fn) {
-		model.getUser(data, function(result) {
+		model.checkUser(data, function(result) {
             var user_id = data.user_id;
 			initializeUser(user_id);
 			fn(true);
