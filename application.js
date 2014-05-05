@@ -141,9 +141,13 @@ io.sockets.on('connection', function(socket) {
 	socket.on('requestGroupSession', function(fn) {
 		var user_id = user_of_socket[socket];
 		for (i in groups){
-			for (j in groups[i]['group_guest_user_id']) {
-				if (groups[i]['group_guest_user_id'][j] == user_id){
-					users[user_id]['groups'].push(i);
+			if (user_id == groups[i]['groups_host_user_id'])
+				users[user_id]['groups'].push(i);
+			else {
+				for (j in groups[i]['group_guest_user_id']) {
+					if (groups[i]['group_guest_user_id'][j] == user_id){
+						users[user_id]['groups'].push(i);
+					}
 				}
 			}
 			
@@ -189,6 +193,8 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('disconnect', function() {
+		var user_id = user_of_socket[socket];
+		delete users[user_id];
 	});
 
 });
