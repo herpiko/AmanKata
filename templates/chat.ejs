@@ -169,12 +169,12 @@
   	$('#chat_bar').hide();
 
   	var current_group_id, groups, data_storage, user_id, password;
+  	var socket = io.connect('http://' + document.domain + ':' + location.port);
   	groups = {};
 
   	if ($.localStorage.isEmpty('AmanKataCert')) {
   		window.location.href = "/";
   	} else {
-  		var socket = io.connect('http://' + document.domain + ':' + location.port);
   		data_storage = $.localStorage.get('AmanKataCert');
   		user_id = data_storage['user_id'];
   		password = data_storage['password'];
@@ -187,14 +187,20 @@
 	        		$.each(result_group, function(i, data_group) {
 	        			var data = data_group.group_id;
 	        			groups[data] = data_group;
-	        			$('#group_header').append('<li><a class="group_header_a" data-id="'+data+'" href="#'+data+'" data-toggle="tab">#'+data+'</a></li>');
-	        			$('#group_content').append('<div class="tab-pane" id="'+data+'"><div class="row"><div class="col-md-9" id="'+data+'_group_message"></div><div class="col-md-3"><br><ul class="list-group" id="'+data+'_group_member"></ul></div></div></div>');
+	        			$('#group_header').append('<li><a class="group_header_a" data-id="'+data+'" href="#'+data+'" data-toggle="tab">#'+data+'<span class="glyphicon glyphicon-exclamation-sign" id="'+data+'_sign"></span></a></li>');
+	        			$('#group_content').append('<div class="tab-pane" id="'+data+'"><div class="row"><div class="col-md-9" id="'+data+'_group_message"></div><div class="col-md-3"><br><b>Group Member:</b><br><ul class="list-group" id="'+data+'_group_member"></ul></div></div></div>');
+	        			$('#'+data+'_sign').hide();
+	        			$.each(data_group.group_guest_user_id, function(key, value) {
+	        				$('#'+data+'_group_member').append('<li class="list-group-item">'+value+'</li>');
+	        			});
+	        			console.log(data_group);
 	        		});
 	        		$('.group_header_a').click(function() {
 				  		current_group_id = $(this).data('id');
 				  		if (current_group_id == 'home') {
 				  			$('#chat_bar').hide();
 				  		} else {
+				  			$('#'+current_group_id+'_sign').hide();
 				  			$('#chat_bar').show();
 				  		}
 				  	});
@@ -211,12 +217,28 @@
 		});
   	}
 
+  	socket.on('retrieveChatClient', function(data) {
+  		var new_message_from_user_id = data.from;
+  		var new_message_from_group_id = data.group_id;
+  		var new_message_content = data.the_message;
+  		var $elem = $('#'+new_message_from_group_id+'_group_message');
+
+		$elem.append('<div class="bs-callout bs-callout-left bs-callout-warning"><h4>'+new_message_from_user_id+'</h4><p>'+new_message_content+'</p></div>');
+		if (current_group_id != new_message_from_group_id) {
+			$('#'+new_message_from_group_id+'_sign').show();	
+		}
+		$('html, body').animate({scrollTop: $elem.height()}, 800);
+	});
+
   	function sendChat(obj) {
   		socket.emit('sendChat', obj);
   	}
 
-  	$('#send').click(function() {
+  	function updateChat() {
   		var chat_message = $('#chat_message').val();
+  		if (!chat_message) return;
+  		$('#'+current_group_id+'_group_message').append('<div class="bs-callout bs-callout-right bs-callout-info text-right"><h4>you</h4><p>'+chat_message+'</p></div>');
+  		
   		if (user_id != groups[current_group_id]['group_host_user_id']) {
   			sendChat({'to':groups[current_group_id]['group_host_user_id'], 'from': user_id, 'group_id': current_group_id, 'the_message': chat_message});
   		}
@@ -225,7 +247,21 @@
 				sendChat({'to':data_group, 'from': user_id, 'group_id': current_group_id, 'the_message': chat_message});
 			}
 		});
+  		var $elem = $('#'+current_group_id+'_group_message');
+		$('#chat_message').val('');
+		$('html, body').animate({scrollTop: $elem.height()}, 800);
+		$('#chat_message').focus();
+  	}
+
+  	$('#send').click(function() {
+  		updateChat();
   	});
+
+	$('#chat_message').keyup(function(event) {
+		if ( event.which == 13 ) {
+			updateChat();
+		}
+	});
 
   	$('#create_new_group').click(function() {
   		$( "#list_user_id li" ).each(function() {
@@ -243,7 +279,7 @@
 
   	$('#start_group_chat').click(function() {
   		var size = $("#list_user_id li").length;
-  		if (size < 2) {
+  		if (size < 1) {
   			alert("Chat Minimal 2 User");
   			return;
   		}

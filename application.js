@@ -3,7 +3,7 @@
  */
 
 /* Path to verinice */
-var verinice_path = "http://localhost:9999"
+var verinice_path = "http://localhost:9999";
 
 var http = require('http');
 var express = require('express');
@@ -15,6 +15,7 @@ app.configure(function() {
     app.set('views', __dirname + '/templates');
     app.set('view engine', 'ejs');
     app.use('/static', express.static(__dirname + "/static"));
+    app.use('/fonts', express.static(__dirname + "/fonts"));
     app.use(express.bodyParser());
 });
 
@@ -140,13 +141,17 @@ io.sockets.on('connection', function(socket) {
 
 	socket.on('requestGroupSession', function(fn) {
 		var user_id = user_of_socket[socket];
-		for (i in groups){
-			if (user_id == groups[i]['groups_host_user_id'])
+		var user_groups = [];
+		for (i in groups) {
+			if (user_id == groups[i]['group_host_user_id']) {
 				users[user_id]['groups'].push(i);
+				user_groups.push(groups[i]);
+			}
 			else {
 				for (j in groups[i]['group_guest_user_id']) {
 					if (groups[i]['group_guest_user_id'][j] == user_id){
 						users[user_id]['groups'].push(i);
+						user_groups.push(groups[i]);
 					}
 				}
 			}
@@ -156,7 +161,7 @@ io.sockets.on('connection', function(socket) {
 			{'group_id':1212124,'group_host_user_id':'ihe','group_guest_user_id':['haidar','ali','wira']},
 			{'group_id':1343444,'group_host_user_id':'ihe','group_guest_user_id':['haidar','ali','wira']}
 		];*/
-		fn(users[user_id]['groups']);
+		fn(user_groups);
 	});
 
 	socket.on('newGroup', function(data, fn) {
@@ -189,12 +194,15 @@ io.sockets.on('connection', function(socket) {
     });
 
 	socket.on('sendChat', function(data) {
-		users[data['to_id']]['socket'].emit('retrieveChatClient',data);
+		if (data['to'] in users) {
+			users[data['to']]['socket'].emit('retrieveChatClient',data);
+		}
 	});
 
-	socket.on('disconnect', function() {
+	/*socket.on('disconnect', function() {
 		var user_id = user_of_socket[socket];
 		delete users[user_id];
-	});
+		delete user_of_socket[user_id];
+	});*/
 
 });
