@@ -30,18 +30,16 @@
           <p>Welcome to AmanKata, the greatest anonymous group chat framework that can make your conversation between your friend, secret service, and drug dealer become very safe and secure.</p>
         </div>
         <div class="col-md-4 well">
-      	  <form class="form">
-                <h2>Login Now</h2>
-                <p>Enter your user id, password and pass your secret private key here.</p>
-                <input type="text" id="user_id" class="form-control" placeholder="User ID">
-                <br/>
-                <input type="text" id="password" class="form-control" placeholder="Password">
-                <br/>
-                <textarea class="form-control" id="private_key" placeholder="Your Private Key"></textarea>
-                <br/>
-                <button id="login" type"button" class="btn btn-primary">Login</button>
-      	       <p>If you don't have any credentials, <a href="/register">Please register</a> for just an half minute.</p>
-      	  </form>        
+          <h2>Login Now</h2>
+          <p>Enter your user id, password and pass your secret private key here.</p>
+          <input type="text" id="user_id" class="form-control" placeholder="User ID">
+          <br/>
+          <input type="password" id="password" class="form-control" placeholder="Password">
+          <br/>
+          <textarea class="form-control" id="private_key" placeholder="Your Private Key"></textarea>
+          <br/>
+          <button id="login" type"button" class="btn btn-primary">Login</button>
+         <p>If you don't have any credentials, <a href="/register">Please register</a> for just an half minute.</p>
       	</div>
       </div>
     </div>
@@ -52,6 +50,10 @@
 <script type="text/javascript">
   $(document).ready(function() {
 
+    if (!$.localStorage.isEmpty('AmanKataCert')) {
+      window.location.href = "/chat";
+    }
+    
     var socket = io.connect('http://' + document.domain + ':' + location.port);
 
     $('#login').click(function() {

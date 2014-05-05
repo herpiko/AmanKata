@@ -171,16 +171,13 @@
   	var current_group_id, groups;
   	groups = {};
 
-  	if (!$.localStorage.isEmpty('AmanKataCert')) {
+  	if ($.localStorage.isEmpty('AmanKataCert')) {
   		window.location.href = "/";
   	} else {
   		var socket = io.connect('http://' + document.domain + ':' + location.port);
   		var data_storage = $.localStorage.get('AmanKataCert');
-  		//var user_id = data_storage['user_id'];
-  		//var password = data_storage['password'];
-
-  		var user_id = 'ali';
-  		var password = 'ali';
+  		var user_id = data_storage['user_id'];
+  		var password = data_storage['password'];
 
   		socket.emit('doLogin', {'user_id': user_id, 'password': password}, function(result) {
 	        if (result) {
