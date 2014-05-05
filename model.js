@@ -23,10 +23,18 @@ db.on('error', console.error.bind(console, 'connection error:'));
 			password: data['password'],
 			certificate: data['certificate']
 		});
-		user.save(function (err, user) {
-			if (err) fn_error();
-            else fn();
-		});
+
+        // Check if user is actually exist
+        module.exports.getUser(data['user_id'], function() {
+            // The user exist, return error
+            fn_error();
+        }, function() {
+            // The user doesn't exist, add it to database
+            user.save(function (err, user) {
+                if (err) fn_error();
+                else fn();
+            });
+        })
 	};
 
 	module.exports.checkUser = function(data, fn) {
