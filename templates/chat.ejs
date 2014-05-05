@@ -103,79 +103,61 @@
           <!-- Nav tabs -->
           <ul id="group_header" class="nav nav-tabs">
             <li class="active">
-              <a href="#home" data-toggle="tab">Dashboard</a>
-            </li>
-            <li>
-              <a href="#122142412" data-toggle="tab">#122142412</a>
-            </li>
-            <li>
-              <a href="#44" data-toggle="tab">#44</a>
+              <a class="group_header_a" data-id="home" href="#home" data-toggle="tab">Dashboard</a>
             </li>
           </ul>
           <!-- Tab panes -->
           <div id="group_content" class="tab-content">
 
-          	<div class="tab-pane active" id="home">
-              <div class="row">
-              	<br>
-                <div class="col-md-9">
-                  Selamat Datang !!!
-                </div>
-                <div class="col-md-3">
-                	<br>
-                  <ul class="list-group">
-                    <li class="list-group-item">initrunlevel0 (On)</li>
-                    <li class="list-group-item">aliariff2013</li>
-                    <li class="list-group-item">haidarmuhammad</li>
-                    <li class="list-group-item">ivanhendrajaya (On)</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div class="tab-pane" id="122142412">
-              <div class="row">
-                <div class="col-md-9 pesan_body">
-              		<div class="bs-callout bs-callout-left bs-callout-warning"><h4>122142412</h4><p>122142412</p></div>
-              	</div>
-                <div class="col-md-3">
-                  <ul class="list-group">
-                    <li class="list-group-item">initrunlevel0 (On)</li>
-                    <li class="list-group-item">aliariff2013</li>
-                    <li class="list-group-item">haidarmuhammad</li>
-                    <li class="list-group-item">ivanhendrajaya (On)</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            <div class="tab-pane" id="44">
-              <div class="row">
-              	<div class="col-md-9 pesan_body">
-              		<div class="bs-callout bs-callout-left bs-callout-warning"><h4>44</h4><p>44</p></div>
-              	</div>
-                <div class="col-md-3">
-                  <ul class="list-group">
-                    <li class="list-group-item">initrunlevel0 (On)</li>
-                    <li class="list-group-item">aliariff2013</li>
-                    <li class="list-group-item">haidarmuhammad</li>
-                    <li class="list-group-item">ivanhendrajaya (On)</li>
-                  </ul>
-                </div>
-              </div>
+            <div class="tab-pane active" id="home">
+              <br>
+              If you want to create a new chat session, click this button<br><br>
+              <a id="create_new_group" class="btn btn-primary">Create a new Chat Session</a><br>
+              <br><br>
             </div>
 
           </div>
+
+          <div id="chat_bar">
 			<p>Send your message here.</p>
 			<textarea class="form-control" id="chat_message" rows="3"  style="width: 75%"></textarea>
 			<br/>
 			<button id="send" class="btn btn-primary">Send</button>
+		  </div>
 
           <br>
           <a href="/">Do Logout, remove my credentials from HTML5 Storage</a>
         </div>
       </div>
     </div>
+
+    <div class="modal fade" id="create_group_modal">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4 class="modal-title">Create New Group</h4>
+	      </div>
+	      <div class="modal-body">
+	      	  <div class="well">
+	            <input type="text" id="text_user" class="form-control" placeholder="Add new user ID">
+	            <br>
+	             <a id="add_user_id" class="btn btn-primary btn-xs">Add User ID</a>
+	             <br><br>
+	            <ul class="list-group" id="list_user_id">
+	            </ul>
+	            <br>
+	            <button id="start_group_chat" class="btn btn-success">Start Group Chat</button>
+	          </div>
+	      </div>
+	      <div class="modal-footer">
+	        <!-- <button type="button" class="btn btn-primary">Start Chat</button> -->
+	        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+	      </div>
+	    </div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+
   </body>
 
 </html>
@@ -184,6 +166,7 @@
   $(document).ready(function() {
   	
   	$('#main_chat').hide();
+  	$('#chat_bar').hide();
 
   	var current_group_id, groups;
   	groups = {};
@@ -211,6 +194,11 @@
 	        		});
 	        		$('.group_header_a').click(function() {
 				  		current_group_id = $(this).data('id');
+				  		if (current_group_id == 'home') {
+				  			$('#chat_bar').hide();
+				  		} else {
+				  			$('#chat_bar').show();
+				  		}
 				  	});
 	        		$('#gambar_loading').fadeOut(500, function() {
 						$('#main_chat').fadeIn(500);
@@ -236,6 +224,26 @@
 			if (user_id != data_group) {
 				sendChat({'to':data_group, 'from': user_id, 'group_id': current_group_id, 'the_message': chat_message});
 			}
+		});
+  	});
+
+  	$('#create_new_group').click(function() {
+  		$( "#list_user_id li" ).each(function() {
+			$( this ).remove();
+		});
+  		$('#create_group_modal').modal('show');
+  	});
+
+  	$('#add_user_id').click(function() {
+  		var text_user = $('#text_user').val();
+  		if (!text_user) return;
+  		$('#text_user').val('');
+  		$('#list_user_id').append('<li class="list-group-item">'+text_user+'</li>');
+  	});
+
+  	$('#start_group_chat').click(function() {
+  		$( "#list_user_id li" ).each(function() {
+			console.log($( this ).text());
 		});
   	});
 
