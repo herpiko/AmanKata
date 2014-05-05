@@ -139,29 +139,35 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('requestGroupSession', function(fn) {
-		var user = user_of_socket[socket];
-		var user_group = [];
-		for (group_id in users[user]["groups"]){
-			var group = users[user]["groups"][group_id];
-			user_group.push(group);
+		var user_id = user_of_socket[socket];
+		for (i in groups){
+			for (j in groups[i]['group_guest_user_id']) {
+				if (groups[i]['group_guest_user_id'][j] == user_id){
+					users[user_id]['groups'].push(i);
+				}
+			}
+			
 		}
 		/*user_group = [
 			{'group_id':1212124,'group_host_user_id':'ihe','group_guest_user_id':['haidar','ali','wira']},
 			{'group_id':1343444,'group_host_user_id':'ihe','group_guest_user_id':['haidar','ali','wira']}
 		];*/
-		fn(user_group);
+		fn(users[user_id]['groups']);
 	});
 
 	socket.on('newGroup', function(data, fn) {
-
+		//check validity
 		var new_group = data;
 		var group_id = generateGroupKey();
-		new_group["group_id"] = group_id;
-		groups[group_id] = new_group;
+		groups[group_id] = [];
 		users[data["group_host_user_id"]]["groups"].push(group_id);
+		groups[group_id] = data;
+		groups[group_id]['group_id'] = group_id; 
 		for (user_id in data["group_guest_user_id"]) {
 			var user = data["group_guest_user_id"][user_id];
-			users[user].push(group_id);
+			if (user in users)
+				users[user].push(group_id);
+			
 		}
 		fn(true);
 	});
