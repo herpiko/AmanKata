@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+var async = require('async');
 var database_server = 'mongodb://localhost/test'; // It actually dynamic depends on where the server is (in case you host it with OpenShift)
 mongoose.connect(database_server);
 
@@ -50,15 +51,11 @@ db.on('error', console.error.bind(console, 'connection error:'));
 
 	module.exports.checkUsersList = function(users_list, fn) {
 		var result = true;
+        var function_list = [];
 		for (i in users_list) {
-			(function(i) { 
-				User.findOne({'user_id': users_list[i]}, function(err, User) {
-					if (User = null) {
-						result = false;
-					}
-				});
-			})(i);
-		}
-		fn(result);
+            function_list.push(function() {
+
+            });
+        }
 	}
 //});
