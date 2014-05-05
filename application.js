@@ -38,7 +38,7 @@ var generateGroupKey = function() {
 }
 
 var initializeUser = function(user_id, socket) {
-	user_of_socket[socket] = user_id;
+	user_of_socket[socket.id] = user_id;
 	users[user_id] = {};
 	users[user_id]["socket"] = socket;
 	users[user_id]["groups"] = [];
@@ -140,7 +140,7 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('requestGroupSession', function(fn) {
-		var user_id = user_of_socket[socket];
+		var user_id = user_of_socket[socket.id];
 		var user_groups = [];
 		for (i in groups) {
 			if (user_id == groups[i]['group_host_user_id']) {
@@ -199,10 +199,10 @@ io.sockets.on('connection', function(socket) {
 		}
 	});
 
-	/*socket.on('disconnect', function() {
-		var user_id = user_of_socket[socket];
+	socket.on('disconnect', function() {
+		var user_id = user_of_socket[socket.id];
 		delete users[user_id];
 		delete user_of_socket[user_id];
-	});*/
+	});
 
 });
