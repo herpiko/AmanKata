@@ -155,7 +155,7 @@ io.sockets.on('connection', function(socket) {
 					}
 				}
 			}
-			
+
 		}
 		/*user_group = [
 			{'group_id':1212124,'group_host_user_id':'ihe','group_guest_user_id':['haidar','ali','wira']},
@@ -171,12 +171,12 @@ io.sockets.on('connection', function(socket) {
 		groups[group_id] = [];
 		users[data["group_host_user_id"]]["groups"].push(group_id);
 		groups[group_id] = data;
-		groups[group_id]['group_id'] = group_id; 
+		groups[group_id]['group_id'] = group_id;
 		for (user_id in data["group_guest_user_id"]) {
 			var user = data["group_guest_user_id"][user_id];
 			if (user in users)
-				users[user].push(group_id);
-			
+				users[user]["groups"].push(group_id);
+
 		}
 		fn(true);
 	});
