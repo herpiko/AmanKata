@@ -186,7 +186,7 @@ mask=0;        //AND this with an array element to chop it down to bpe bits
 radix=mask+1;  //equals 2^bpe.  A single 1 bit to the left of the last bit of mask.
 
 //the digits for converting to different bases
-digitsStr='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_=!@#$%^&*()[]{}|;:,.<>/?`~ \\\'\"+-';
+digitsStr='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_=!@#$%^&*()[]{}|;:,.<>/?`~ \\\'\"+-';
 
 //initialize the global variables
 for (bpe=0; (1<<(bpe+1)) > (1<<bpe); bpe++);  //bpe=number of bits in the mantissa on this platform

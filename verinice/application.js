@@ -16,7 +16,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('signCertificate', function(data, fn) {
         var str = JSON.stringify(data);
         var shaObj = new jsSHA(str, 'TEXT');
-        var hash = shaObj.getHash('SHA-512', 'HEX');
+        var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
         var sign = bigInt2str(powMod(str2bigInt(hash, 16, 1, 1), d, n), 16);
         var certificate = {
             'certificate': data,

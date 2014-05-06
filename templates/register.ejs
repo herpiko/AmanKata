@@ -52,12 +52,12 @@
               <br/>User ID:
               <span id='user_id_result' class='over-text'>
               </span>
-              <br/>Public RSA
-              <br/>&nbsp;&nbsp;&nbsp;E:
-              <span id='e_public_rsa' class='over-text'>
+              <br/>Public RSA (E, N):
+              <br/>
+              <span id='public_rsa' class='over-text'>
               </span>
-              <br/>&nbsp;&nbsp;&nbsp;N:
-              <span id='n_public_rsa' class='over-text'>
+              <br/>Public DHE (G, Q, Y):
+              <span id='public_dhe' class='over-text'>
               </span>
               <br/>Here is your private key (safe it in the safest place on earth that only you know it) : 
               <div id='private_key' class='over-text'>
@@ -94,15 +94,17 @@
   $(document).ready(function() {
 
     closeMessage();
-
+    
     var socket = io.connect('http://' + document.domain + ':' + location.port);
 
     var eVeriNice = str2bigInt('10001', 16, 1, 1);
     var nVeriNice = str2bigInt('5E89E95A0DD227CE91F0549A0ECDBAA33676FF252077F5317DAE5B3EA2E16B82D1F30497C9A74CF5F646C1A75C163B5C9D6C88D4BB8732BAF537190D943808A656F2FFD3D46DC0C22F31AD98B2F29910F8DA223ED9C317866CAF2790BEEF0AB4B702CD1B302A567053A5CDBF29E5E4276AEE29B5AC41E1FE54EEC89040C8B213', 16, 1, 1);
-
-    var generateRSA = function(fn) {
-      var p, q, n, e, d, phi;
-      e = int2bigInt(65537, 1, 1);
+    var eRSA = str2bigInt('10001', 16, 1, 1);
+    var gDHE = str2bigInt('7FFFFFFF', 16, 1, 1);
+    var qDHE = str2bigInt('B037D2867723DC4F0352C2DD3AE53EF685EE197BB8BD63E11FDD32BC33FCA596B6DDCBA89B43EB09CBE1CC0F01E030A735E48FC7B166F99B8CEA2F5320806CB568826319DE68F0A8FE9EC2AEF892A2666197573EC11D794A062D9B11EA4BFD2834CFB4312299E0EE29B2CC81D0666DE5C635B730318F3FB2DF789034BC3DD063', 16, 1, 1);
+    
+    var generateKey = function(fn) {
+      var p, q, n, d, phi;
       do {
           p = randTruePrime(512);
           do {
@@ -110,14 +112,19 @@
           } while (q == p);
           n = mult(p, q);
           phi = mult(addInt(p, -1), addInt(q, -1));
-          d = inverseMod(e, phi);
+          d = inverseMod(eRSA, phi);
       } while (!d);
-      fn(d, n);
+
+      var x, y;
+      x = randBigInt(512);
+      y = powMod(gDHE, x, qDHE);
+
+      fn(n, d, x, y);
     };
 
     var verifySign = function(str, sign, fn) {
         var shaObj = new jsSHA(str, 'TEXT');
-        var hash = shaObj.getHash('SHA-512', 'HEX');
+        var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
         var verify = bigInt2str(powMod(str2bigInt(sign, 16, 1, 1), eVeriNice, nVeriNice), 16);
         fn(hash == verify);
     }
@@ -133,8 +140,8 @@
       var password = $('#password').val();
       if (!user_id || !password) return;
       $('#pleaseWaitDialog').modal('show');
-      generateRSA(function(d, n) {
-        var certificate = {'user_id': user_id, 'public_RSA': {'e': '10001', 'n': bigInt2str(n, 16)}};
+      generateKey(function(n, d, x, y) {
+        var certificate = {'user_id': user_id, 'public_RSA': {'e': bigInt2str(eRSA, 16), 'n': bigInt2str(n, 16)}, 'public_DHE': {'g': bigInt2str(gDHE, 16), 'q': bigInt2str(qDHE, 16), 'y': bigInt2str(y, 16)}};
         socket.emit('registerUser', {'user_id': user_id, 'password': password, 'user_certificate': certificate}, function(result) {
           if (result) {
             $('#pleaseWaitDialog').modal('hide');
@@ -142,9 +149,9 @@
             verifySign(str, result.sign, function(valid) {
               if (valid) {
                 $('#user_id_result').text(result.certificate.user_id);
-                $('#e_public_rsa').text(result.certificate.public_RSA.e);
-                $('#n_public_rsa').text(result.certificate.public_RSA.n);
-                $('#private_key').text(bigInt2str(d, 16));
+                $('#public_rsa').text('(' + result.certificate.public_RSA.e + ', ' + result.certificate.public_RSA.n + ')');
+                $('#public_dhe').text('(' + result.certificate.public_DHE.g + ', ' + result.certificate.public_DHE.q + ', ' + result.certificate.public_DHE.y + ')');
+                $('#private_key').text(bigInt2str(d, 16) + '\n' + bigInt2str(x, 16));
                 $('#success_message').show();
                 return;
               }
