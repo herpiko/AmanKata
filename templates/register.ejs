@@ -48,10 +48,18 @@
             <div id='success_message' class='well'>
               <strong>Your Registration is Success</strong>
               <br/>
-              Here is your certificate data : 
-              <div id='cert_data' class='over-text'>
-              </div>
-              Here is your private key (safe it in the safest place on earth that only you know it) : 
+              Here is your certificate data: 
+              <br/>User ID:
+              <span id='user_id_result' class='over-text'>
+              </span>
+              <br/>Public RSA
+              <br/>&nbsp;&nbsp;&nbsp;E:
+              <span id='e_public_rsa' class='over-text'>
+              </span>
+              <br/>&nbsp;&nbsp;&nbsp;N:
+              <span id='n_public_rsa' class='over-text'>
+              </span>
+              <br/>Here is your private key (safe it in the safest place on earth that only you know it) : 
               <div id='private_key' class='over-text'>
               </div>
             </div>
@@ -60,6 +68,21 @@
               <strong>Nope, seems like VeriNice can't do any signation part. Try again later.</strong>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="pleaseWaitDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+              <h1>Processing...</h1>
+          </div>
+          <div class="modal-body">
+              <div class="progress progress-striped active">
+                  <div class="progress-bar" style="width: 100%;"></div>
+              </div>
+          </div>
         </div>
       </div>
     </div>
@@ -101,16 +124,21 @@
       closeMessage();
       var user_id = $('#user_id').val();
       var password = $('#password').val();
+      if (!user_id || !password) return;
+      $('#pleaseWaitDialog').modal('show');
       generateRSA(function(d, n) {
         var certificate = {'user_id': user_id, 'public_RSA': {'e': '10001', 'n': bigInt2str(n, 16)}};
         socket.emit('registerUser', {'user_id': user_id, 'password': password, 'user_certificate': certificate}, function(result) {
           if (result) {
+            $('#pleaseWaitDialog').modal('hide');
             var str = JSON.stringify(result.certificate);
             var shaObj = new jsSHA(str, 'TEXT');
             var hash = shaObj.getHash('SHA-512', 'HEX');
             var verify = bigInt2str(powMod(str2bigInt(result.sign, 16, 1, 1), eVeriNice, nVeriNice), 16);
             if (hash == verify) {
-              $('#cert_data').text(str);
+              $('#user_id_result').text(result.certificate.user_id);
+              $('#e_public_rsa').text(result.certificate.public_RSA.e);
+              $('#n_public_rsa').text(result.certificate.public_RSA.n);
               $('#private_key').text(bigInt2str(d, 16));
               $('#success_message').show();
               return;
