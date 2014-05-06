@@ -4,12 +4,14 @@
   
   <head>
     <title>Register AmanKata</title>
-    <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" href="/static/bootstrap.min.css">
-    <script type="text/javascript" src="/static/jquery.min.js"></script>
-    <script type="text/javascript" src="/static/bootstrap.min.js"></script>
-    <script type="text/javascript" src="/static/socket.io.min.js"></script>
-    <style type="text/css">
+    <meta name='viewport' content='width=device-width'>
+    <link rel='stylesheet' href='/static/bootstrap.min.css'>
+    <script type='text/javascript' src='/static/jquery.min.js'></script>
+    <script type='text/javascript' src='/static/bootstrap.min.js'></script>
+    <script type='text/javascript' src='/static/socket.io.min.js'></script>
+    <script type='text/javascript' src='/static/bigint.js'></script>
+    <script type='text/javascript' src='/static/sha.js'></script>
+    <style type='text/css'>
       .over-text {
         word-wrap: break-word;
       }
@@ -17,44 +19,44 @@
   </head>
   
   <body>
-    <div class="container">
-      <div class="navbar navbar-default">
-        <div class="container-fluid">
-          <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-              <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+    <div class='container'>
+      <div class='navbar navbar-default'>
+        <div class='container-fluid'>
+          <div class='navbar-header'>
+            <button type='button' class='navbar-toggle' data-toggle='collapse' data-target='.navbar-collapse'>
+              <span class='sr-only'>Toggle navigation</span><span class='icon-bar'></span><span class='icon-bar'></span><span class='icon-bar'></span>
             </button>
-            <a href="/" class="navbar-brand"><strong>A</strong>man<strong>K</strong>ata</a>
+            <a href='/' class='navbar-brand'><strong>A</strong>man<strong>K</strong>ata</a>
           </div>
         </div>
       </div>
-      <div class="row">
-        <div class="col-md-12">
+      <div class='row'>
+        <div class='col-md-12'>
           <h1>AmanKata <small>Registration Form</small></h1>
           <p>Tells us your user ID and password, and I will give you your signed certificate that can publicily known and your private key that must not be known by other people but you.</p>
-          <form role="form">
-            <div class="form-group">
-              <label for="user_id">Your User ID</label>
-              <input type="email" class="form-control" id="user_id" placeholder="Your User ID">
+          <form role='form'>
+            <div class='form-group'>
+              <label for='user_id'>Your User ID</label>
+              <input type='email' class='form-control' id='user_id' placeholder='Your User ID'>
             </div>
-            <div class="form-group">
-              <label for="password">Your Password</label>
-              <input type="password" class="form-control" id="password" placeholder="Your Password">
+            <div class='form-group'>
+              <label for='password'>Your Password</label>
+              <input type='password' class='form-control' id='password' placeholder='Your Password'>
             </div>
-            <button type="button" class="btn btn-primary" id="register">Register</button>
+            <button type='button' class='btn btn-primary' id='register'>Register</button>
             <br/><br/>
-            <div id="success_message" class="well">
+            <div id='success_message' class='well'>
               <strong>Your Registration is Success</strong>
               <br/>
               Here is your certificate data : 
-              <div id="cert_data" class="over-text">
+              <div id='cert_data' class='over-text'>
               </div>
               Here is your private key (safe it in the safest place on earth that only you know it) : 
-              <div id="private_key" class="over-text">
+              <div id='private_key' class='over-text'>
               </div>
             </div>
             <!-- Kalau pendaftarannya gagal (SocketIO returnnya null) -->
-            <div id="error_message" class="well">
+            <div id='error_message' class='well'>
               <strong>Nope, seems like VeriNice can't do any signation part. Try again later.</strong>
             </div>
           </form>
@@ -65,12 +67,30 @@
 
 </html>
 
-<script type="text/javascript">
+<script type='text/javascript'>
   $(document).ready(function() {
 
     closeMessage();
-    
+
     var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    var eVeriNice = str2bigInt('10001', 16, 1, 1);
+    var nVeriNice = str2bigInt('5E89E95A0DD227CE91F0549A0ECDBAA33676FF252077F5317DAE5B3EA2E16B82D1F30497C9A74CF5F646C1A75C163B5C9D6C88D4BB8732BAF537190D943808A656F2FFD3D46DC0C22F31AD98B2F29910F8DA223ED9C317866CAF2790BEEF0AB4B702CD1B302A567053A5CDBF29E5E4276AEE29B5AC41E1FE54EEC89040C8B213', 16, 1, 1);
+
+    var generateRSA = function(fn) {
+      var p, q, n, e, d, phi;
+      e = int2bigInt(65537, 1, 1);
+      do {
+          p = randTruePrime(512);
+          do {
+            q = randTruePrime(512);
+          } while (q == p);
+          n = mult(p, q);
+          phi = mult(addInt(p, -1), addInt(q, -1));
+          d = inverseMod(e, phi);
+      } while (!d);
+      fn(d, n);
+    };
 
     function closeMessage() {
       $('#success_message').hide();
@@ -79,22 +99,26 @@
     
     $('#register').click(function() {
       closeMessage();
-      $('#success_message').show();
       var user_id = $('#user_id').val();
       var password = $('#password').val();
-      socket.emit('registerUser', {'user_id': user_id, 'password': password, 'user_certificate': 'abc'}, function(result) {
-        closeMessage();
-        alert(result);
-        if (result) {
-          // tampilkan informasi private key dll.
-          $('#cert_data').text(result);
-          $('#private_key').text("asalalalala");
-          $('#success_message').show();
-        } else {
+      generateRSA(function(d, n) {
+        var certificate = {'user_id': user_id, 'public_RSA': {'e': '10001', 'n': bigInt2str(n, 16)}};
+        socket.emit('registerUser', {'user_id': user_id, 'password': password, 'user_certificate': certificate}, function(result) {
+          if (result) {
+            var str = JSON.stringify(result.certificate);
+            var shaObj = new jsSHA(str, 'TEXT');
+            var hash = shaObj.getHash('SHA-512', 'HEX');
+            var verify = bigInt2str(powMod(str2bigInt(result.sign, 16, 1, 1), eVeriNice, nVeriNice), 16);
+            if (hash == verify) {
+              $('#cert_data').text(str);
+              $('#private_key').text(bigInt2str(d, 16));
+              $('#success_message').show();
+              return;
+            }
+          }
           $('#error_message').show();
-        }
+        });
       });
     });
-
   });
 </script>
