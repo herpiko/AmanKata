@@ -4,6 +4,13 @@ console.log("Connecting to database");
 
 console.log("Database connected, testing started");
 
+user_list = ['a','b'];
+model.getUsers(user_list, function(result) {
+    console.log(result);
+});
+
+
+
 // TEST 1: Add new user
 var new_user = {"user_id": "initrunlevel0", "password": "this should be hashed", "certificate": "no idea"};
 model.registerUser(new_user, function() {

@@ -66,29 +66,31 @@ db.on('error', console.error.bind(console, 'connection error:'));
         });
     };
 
-    module.exports.checkUsersList = function(users_list, fn) {
-        var result = true;
-        var function_list = [];
+    module.exports.getUsers = function(users_list, fn) {
+        users_list_formatted = [];
         for (i in users_list) {
-            function_list.push(function(callback) {
-                User.findOne( {'user_id': users_list[i]}, function (err, User) {
-                    if (err)
-                        callback(null, false);
-                    else {
-                        if (User == null) callback(null, false);
-                        else callback(null, true);
-                    }
-                });
-            });
+            users_list_formatted.push({'user_id':users_list[i]});
         }
-        async.parallel(function_list, function(err, results){
-            for (i in results) {
-                if (results[i]== false){
-                    fn(false);
-                    return;
-                }
-            }
-            fn(true);
+        var query_where = { $or: users_list_formatted };
+        User.find( query_where, function (err, users) {
+            fn(users);
+        });
+    };
+
+    module.exports.checkUsersList = function(users_list, fn) {
+        users_list_formatted = [];
+        for (i in users_list) {
+            users_list_formatted.push({'user_id':users_list[i]});
+        }
+        var query_where = { $or: users_list_formatted };
+        User.find( query_where, function (err, users) {
+            if (users.length == users_list.length)
+                fn(true);
+            else
+                fn(false);
+            /*users.count(function(err, count){
+                console.log("Total matches "+count);
+            });*/
         });
     }
 //});
