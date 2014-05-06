@@ -9,8 +9,8 @@
     <script type='text/javascript' src='/static/jquery.min.js'></script>
     <script type='text/javascript' src='/static/bootstrap.min.js'></script>
     <script type='text/javascript' src='/static/socket.io.min.js'></script>
-    <script type='text/javascript' src='/static/bigint.js'></script>
     <script type='text/javascript' src='/static/sha.js'></script>
+    <script type='text/javascript' src='/static/bigint.js'></script>
     <style type='text/css'>
       .over-text {
         word-wrap: break-word;
@@ -115,6 +115,13 @@
       fn(d, n);
     };
 
+    var verifySign = function(str, sign, fn) {
+        var shaObj = new jsSHA(str, 'TEXT');
+        var hash = shaObj.getHash('SHA-512', 'HEX');
+        var verify = bigInt2str(powMod(str2bigInt(sign, 16, 1, 1), eVeriNice, nVeriNice), 16);
+        fn(hash == verify);
+    }
+
     function closeMessage() {
       $('#success_message').hide();
       $('#error_message').hide();
@@ -132,17 +139,16 @@
           if (result) {
             $('#pleaseWaitDialog').modal('hide');
             var str = JSON.stringify(result.certificate);
-            var shaObj = new jsSHA(str, 'TEXT');
-            var hash = shaObj.getHash('SHA-512', 'HEX');
-            var verify = bigInt2str(powMod(str2bigInt(result.sign, 16, 1, 1), eVeriNice, nVeriNice), 16);
-            if (hash == verify) {
-              $('#user_id_result').text(result.certificate.user_id);
-              $('#e_public_rsa').text(result.certificate.public_RSA.e);
-              $('#n_public_rsa').text(result.certificate.public_RSA.n);
-              $('#private_key').text(bigInt2str(d, 16));
-              $('#success_message').show();
-              return;
-            }
+            verifySign(str, result.sign, function(valid) {
+              if (valid) {
+                $('#user_id_result').text(result.certificate.user_id);
+                $('#e_public_rsa').text(result.certificate.public_RSA.e);
+                $('#n_public_rsa').text(result.certificate.public_RSA.n);
+                $('#private_key').text(bigInt2str(d, 16));
+                $('#success_message').show();
+                return;
+              }
+            });
           }
           $('#error_message').show();
         });
