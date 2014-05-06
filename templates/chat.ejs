@@ -168,9 +168,10 @@
   	$('#main_chat').hide();
   	$('#chat_bar').hide();
 
-  	var current_group_id, groups, data_storage, user_id, password;
+  	var current_group_id, groups, data_storage, user_id, password, certificates;
   	var socket = io.connect('http://' + document.domain + ':' + location.port);
   	groups = {};
+  	certificates = {};
 
   	if ($.localStorage.isEmpty('AmanKataCert')) {
   		window.location.href = "/";
@@ -185,15 +186,7 @@
 	        	$('#tag_user_id').text(user_id);
 	        	socket.emit('requestGroupSession', function(result_group) {
 	        		$.each(result_group, function(i, data_group) {
-	        			var data = data_group.group_id;
-	        			groups[data] = data_group;
-	        			$('#group_header').append('<li><a class="group_header_a" data-id="'+data+'" href="#'+data+'" data-toggle="tab">#'+data+'<span class="glyphicon glyphicon-exclamation-sign" id="'+data+'_sign"></span></a></li>');
-	        			$('#group_content').append('<div class="tab-pane" id="'+data+'"><div class="row"><div class="col-md-9" id="'+data+'_group_message"></div><div class="col-md-3"><br><b>Group Member:</b><br><ul class="list-group" id="'+data+'_group_member"></ul></div></div></div>');
-	        			$('#'+data+'_sign').hide();
-	        			$.each(data_group.group_guest_user_id, function(key, value) {
-	        				$('#'+data+'_group_member').append('<li class="list-group-item">'+value+'</li>');
-	        			});
-	        			console.log(data_group);
+	        			updateGroup(data_group);
 	        		});
 	        		$('.group_header_a').click(function() {
 				  		current_group_id = $(this).data('id');
@@ -230,6 +223,37 @@
 		$('html, body').animate({scrollTop: $elem.height()}, 800);
 	});
 
+	socket.on('newGroupClient', function(data_group) {
+		updateGroup(data_group);
+		$('.group_header_a').click(function() {
+	  		current_group_id = $(this).data('id');
+	  		if (current_group_id == 'home') {
+	  			$('#chat_bar').hide();
+	  		} else {
+	  			$('#'+current_group_id+'_sign').hide();
+	  			$('#chat_bar').show();
+	  		}
+	  	});
+	});
+
+	function updateGroup(data_group) {
+		var data = data_group.group_id;
+		groups[data] = data_group;
+		$('#group_header').append('<li><a class="group_header_a" data-id="'+data+'" href="#'+data+'" data-toggle="tab">#'+data+'<span class="glyphicon glyphicon-exclamation-sign" id="'+data+'_sign"></span></a></li>');
+		$('#group_content').append('<div class="tab-pane" id="'+data+'"><div class="row"><div class="col-md-9" id="'+data+'_group_message"></div><div class="col-md-3"><br><b>Group Member:</b><br><ul class="list-group" id="'+data+'_group_member"></ul></div></div></div>');
+		$('#'+data+'_sign').hide();
+		$('#'+data+'_group_member').append('<li class="list-group-item">'+data_group.group_host_user_id+'</li>');
+		$.each(data_group.group_guest_user_id, function(key, value) {
+			$('#'+data+'_group_member').append('<li class="list-group-item">'+value.user_id+'</li>');
+			if (!(value.user_id in certificates)) {
+				certificates[value.user_id] = value.user_certificate;
+			}
+		});
+		if (!(data_group.group_host_user_id in certificates)) {
+			certificates[data_group.group_host_user_id] = data_group.group_host_user_certificate;
+		}
+	}
+	
   	function sendChat(obj) {
   		socket.emit('sendChat', obj);
   	}
@@ -243,8 +267,8 @@
   			sendChat({'to':groups[current_group_id]['group_host_user_id'], 'from': user_id, 'group_id': current_group_id, 'the_message': chat_message});
   		}
   		$.each(groups[current_group_id]['group_guest_user_id'], function(i, data_group) {
-			if (user_id != data_group) {
-				sendChat({'to':data_group, 'from': user_id, 'group_id': current_group_id, 'the_message': chat_message});
+			if (user_id != data_group.user_id) {
+				sendChat({'to':data_group.user_id, 'from': user_id, 'group_id': current_group_id, 'the_message': chat_message});
 			}
 		});
   		var $elem = $('#'+current_group_id+'_group_message');
