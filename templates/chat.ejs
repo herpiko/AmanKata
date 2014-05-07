@@ -13,6 +13,7 @@
 	<script type='text/javascript' src='/static/sha.js'></script>
 	<script type='text/javascript' src='/static/bigint.js'></script>
 	<script type="text/javascript" src="/static/jquery.storageapi.min.js"></script>
+	<script type="text/javascript" src="/static/emojify.min.js"></script>
 	<style>
 		.pagination-centered {
 		  text-align: center;
@@ -273,6 +274,21 @@
 		}
 		$('html, body').animate({scrollTop: $elem.height()}, 800);
 		$('#chatAudio')[0].play();
+
+		emojify.setConfig({
+		    emojify_tag_type : 'div',
+		    only_crawl_id    : null,
+		    img_dir          : '/static/images/emoji',
+		    ignored_tags     : {
+		        'SCRIPT'  : 1,
+		        'TEXTAREA': 1,
+		        'A'       : 1,
+		        'PRE'     : 1,
+		        'CODE'    : 1
+		    }
+		});
+		emojify.run();
+
 	});
 
 	socket.on('newGroupClient', function(data_group) {
@@ -361,6 +377,20 @@
 		$('#chat_message').val('');
 		$('html, body').animate({scrollTop: $elem.height()}, 800);
 		$('#chat_message').focus();
+
+		emojify.setConfig({
+		    emojify_tag_type : 'div',
+		    only_crawl_id    : null,
+		    img_dir          : '/static/images/emoji',
+		    ignored_tags     : {
+		        'SCRIPT'  : 1,
+		        'TEXTAREA': 1,
+		        'A'       : 1,
+		        'PRE'     : 1,
+		        'CODE'    : 1
+		    }
+		});
+		emojify.run();
   	}
 
   	$('#send').click(function() {
