@@ -181,6 +181,7 @@
 
 	var reorderCertificate = function(certificate) {
 		console.log(certificate);
+		return certificate;
 		new_certificate = {};
 		new_certificate['user_id'] = certificate.user_id;
 		new_certificate['public_RSA'] = {};
@@ -198,7 +199,7 @@
   	$('#main_chat').hide();
   	$('#chat_bar').hide();
 
-  	var current_group_id, groups, data_storage, user_id, password, certificates;
+  	var current_group_id, groups, data_storage, user_id, password, certificates, private_key_rsa,private_key_dhe;
   	var socket = io.connect('http://' + document.domain + ':' + location.port);
   	groups = {};
   	certificates = {};
@@ -209,6 +210,8 @@
   		data_storage = $.localStorage.get('AmanKataCert');
   		user_id = data_storage['user_id'];
   		password = data_storage['password'];
+  		private_key_rsa = data_storage['private_key_rsa'];
+  		private_key_dhe = data_storage['private_key_dhe'];
 
   		socket.emit('doLogin', {'user_id': user_id, 'password': password}, function(result) {
 	        if (result) {
@@ -280,6 +283,8 @@
 				verifySign(JSON.stringify(value.user_certificate.certificate), value.user_certificate.sign, function(valid) {
 					if (valid)
 						certificates[value.user_id] = value.user_certificate;
+					else
+						alert("Certificate from server not valid");
 				} );
 			}
 		});
@@ -288,11 +293,15 @@
 			verifySign(JSON.stringify(data_group.group_host_user_certificate.certificate), data_group.group_host_user_certificate.sign, function(valid) {
 					if (valid)
 						certificates[data_group.group_host_user_id] = data_group.group_host_user_certificate;
+					else
+						alert("Certificate from server not valid");
 			});
 		}
 	}
 	
   	function sendChat(obj) {
+  		var d = new Date();
+		var n = d.getTime();
   		socket.emit('sendChat', obj);
   	}
 
