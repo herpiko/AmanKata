@@ -1,7 +1,7 @@
 {
   "name": "amankata",
   "description": "amankata node.js edition",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "express": "3.x",
