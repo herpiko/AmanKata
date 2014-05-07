@@ -170,9 +170,9 @@
 
 	var verifySign = function(str, sign, fn) {
 	    var shaObj = new jsSHA(str, 'TEXT');
-	    var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
-	    var verify = bigInt2str(powMod(str2bigInt(sign, 16, 1), eVeriNice, nVeriNice), 16);
-	    fn(hash == verify);
+	    var hash = str2bigInt(shaObj.getHash('SHA-512', 'HEX').toUpperCase(), 16, 1);
+	    var verify = powMod(str2bigInt(sign, 16, 1), eVeriNice, nVeriNice);
+	    fn(equals(hash, verify));
 	};
 
 	var reorderCertificate = function(certificate) {
@@ -252,10 +252,10 @@
   		var e = str2bigInt(certificates[obj.from].certificate.public_RSA.e, 16, 1);
   		var n = str2bigInt(certificates[obj.from].certificate.public_RSA.n, 16, 1);
         var shaObj = new jsSHA(obj.the_message + obj.salt, 'TEXT');
-        var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
-        var verify = bigInt2str(powMod(str2bigInt(obj.sign, 16, 1), e, n), 16);
+        var hash = str2bigInt(shaObj.getHash('SHA-512', 'HEX').toUpperCase(), 16, 1);
+        var verify = powMod(str2bigInt(obj.sign, 16, 1), e, n);
         
-	    if (hash != verify) {
+	    if (!equals(hash, verify)) {
 	    	alert('invalid message');
 	    	return;
     	}
@@ -338,7 +338,7 @@
   	}
 
   	function updateChat() {
-  		var chat_message = $('#chat_message').val();
+  		var chat_message = $('#chat_message').val().replace(/[\r\n\t]/g, '');
   		if (!chat_message) return;
   		$('#'+current_group_id+'_group_message').append('<div class="bs-callout bs-callout-right bs-callout-info text-right"><h4>you</h4><p>'+chat_message+'</p></div>');
   		

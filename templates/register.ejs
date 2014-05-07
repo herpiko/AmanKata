@@ -59,9 +59,14 @@
               <br/>Public DHE (G, Q, Y):
               <span id='public_dhe' class='over-text'>
               </span>
-              <br/>Here is your private key (safe it in the safest place on earth that only you know it) : 
-              <div id='private_key' class='over-text'>
-              </div>
+              <br/>Here is your private key (safe it in the safest place on earth that only you know it): 
+              <br/>Private RSA (D):
+              <br/>
+              <span id='private_rsa' class='over-text'>
+              </span>
+              <br/>Private DHE (X):
+              <span id='private_dhe' class='over-text'>
+              </span>
             </div>
             <!-- Kalau pendaftarannya gagal (SocketIO returnnya null) -->
             <div id='error_message' class='well'>
@@ -126,9 +131,9 @@
 
     var verifySign = function(str, sign, fn) {
         var shaObj = new jsSHA(str, 'TEXT');
-        var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
-        var verify = bigInt2str(powMod(str2bigInt(sign, 16, 1), eVeriNice, nVeriNice), 16);
-        fn(hash == verify);
+	    var hash = str2bigInt(shaObj.getHash('SHA-512', 'HEX').toUpperCase(), 16, 1);
+	    var verify = powMod(str2bigInt(sign, 16, 1), eVeriNice, nVeriNice);
+	    fn(equals(hash, verify));
     }
 
     function closeMessage() {
@@ -153,7 +158,8 @@
                 $('#user_id_result').text(result.certificate.user_id);
                 $('#public_rsa').text('(' + result.certificate.public_RSA.e + ', ' + result.certificate.public_RSA.n + ')');
                 $('#public_dhe').text('(' + result.certificate.public_DHE.g + ', ' + result.certificate.public_DHE.q + ', ' + result.certificate.public_DHE.y + ')');
-                $('#private_key').text(bigInt2str(d, 16) + '\n' + bigInt2str(x, 16));
+                $('#private_rsa').text(bigInt2str(d, 16));
+                $('#private_dhe').text(bigInt2str(x, 16));
                 $('#success_message').show();
                 return;
               }
