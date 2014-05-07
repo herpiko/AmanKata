@@ -3,7 +3,6 @@
  */
 
 /* Path to verinice */
-var verinice_path = 'http://localhost:9999';
 
 var http = require('http');
 var express = require('express');
@@ -19,7 +18,14 @@ app.configure(function() {
     app.use(express.bodyParser());
 });
 
-var server = app.listen(5000);
+var server_port = process.env.OPENSHIFT_NODEJS_PORT || 5000;
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+if(server_port != process.env.OPENSHIFT_NODEJS_PORT) {
+    var verinice_path = 'http://localhost:9999';
+} else {
+    var verinice_path = 'http://verinice.wirama.web.id'
+}
+var server = app.listen(server_port, server_ip_address);
 var io = require('socket.io').listen(server);
 var io_client = require('socket.io-client');
 
@@ -185,7 +191,7 @@ io.sockets.on('connection', function(socket) {
                              //console.log("y");
                              break;
 						}
-						
+
 					}
 					//groups[group_id]["group_guest_user_id"][user.user_id]["group_guest_user_certificate"] = user.certificate;
 					//console.log(users);
@@ -209,8 +215,8 @@ io.sockets.on('connection', function(socket) {
 				fn(true);
 			});
 		}, function(){} );
-		
-		
+
+
     });
 
     socket.on('requestCertificate', function(data, fn) {
