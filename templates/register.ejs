@@ -97,19 +97,21 @@
     
     var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-    var eVeriNice = str2bigInt('10001', 16, 1, 1);
-    var nVeriNice = str2bigInt('5E89E95A0DD227CE91F0549A0ECDBAA33676FF252077F5317DAE5B3EA2E16B82D1F30497C9A74CF5F646C1A75C163B5C9D6C88D4BB8732BAF537190D943808A656F2FFD3D46DC0C22F31AD98B2F29910F8DA223ED9C317866CAF2790BEEF0AB4B702CD1B302A567053A5CDBF29E5E4276AEE29B5AC41E1FE54EEC89040C8B213', 16, 1, 1);
-    var eRSA = str2bigInt('10001', 16, 1, 1);
-    var gDHE = str2bigInt('7FFFFFFF', 16, 1, 1);
-    var qDHE = str2bigInt('B037D2867723DC4F0352C2DD3AE53EF685EE197BB8BD63E11FDD32BC33FCA596B6DDCBA89B43EB09CBE1CC0F01E030A735E48FC7B166F99B8CEA2F5320806CB568826319DE68F0A8FE9EC2AEF892A2666197573EC11D794A062D9B11EA4BFD2834CFB4312299E0EE29B2CC81D0666DE5C635B730318F3FB2DF789034BC3DD063', 16, 1, 1);
+    var eVeriNice = str2bigInt('10001', 16, 1);
+    var nVeriNice = str2bigInt('5E89E95A0DD227CE91F0549A0ECDBAA33676FF252077F5317DAE5B3EA2E16B82D1F30497C9A74CF5F646C1A75C163B5C9D6C88D4BB8732BAF537190D943808A656F2FFD3D46DC0C22F31AD98B2F29910F8DA223ED9C317866CAF2790BEEF0AB4B702CD1B302A567053A5CDBF29E5E4276AEE29B5AC41E1FE54EEC89040C8B213', 16, 1);
+    var eRSA = str2bigInt('10001', 16, 1);
+    var gDHE = str2bigInt('7FFFFFFF', 16, 1);
+    var qDHE = str2bigInt('B037D2867723DC4F0352C2DD3AE53EF685EE197BB8BD63E11FDD32BC33FCA596B6DDCBA89B43EB09CBE1CC0F01E030A735E48FC7B166F99B8CEA2F5320806CB568826319DE68F0A8FE9EC2AEF892A2666197573EC11D794A062D9B11EA4BFD2834CFB4312299E0EE29B2CC81D0666DE5C635B730318F3FB2DF789034BC3DD063', 16, 1);
     
     var generateKey = function(fn) {
       var p, q, n, d, phi;
       do {
-          p = randTruePrime(512);
+          do {
+            p = randTruePrime(512);
+          } while (equalsInt(mod(p, eRSA), 1));
           do {
             q = randTruePrime(512);
-          } while (q == p);
+          } while (equals(q, p) || equalsInt(mod(q, eRSA), 1));
           n = mult(p, q);
           phi = mult(addInt(p, -1), addInt(q, -1));
           d = inverseMod(eRSA, phi);
@@ -125,7 +127,7 @@
     var verifySign = function(str, sign, fn) {
         var shaObj = new jsSHA(str, 'TEXT');
         var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
-        var verify = bigInt2str(powMod(str2bigInt(sign, 16, 1, 1), eVeriNice, nVeriNice), 16);
+        var verify = bigInt2str(powMod(str2bigInt(sign, 16, 1), eVeriNice, nVeriNice), 16);
         fn(hash == verify);
     }
 

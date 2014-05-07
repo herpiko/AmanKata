@@ -34,11 +34,6 @@ var rCon = [0x8D, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36];
 var nBit = 128;
 var nByte = nBit >> 3;
 var nRound = (nByte / 4) + 6;
-var N = [];
-var setN = function(n, k) 
-{
-	N[k] = n;
-}
 /**
  * @param {String} character representation
  * @return {Number[]} unicode representation
@@ -47,7 +42,7 @@ function toHexadecimal(s)
 {
 	var res = [];
 	for (var i = 0; i < s.length; i++)
-		res[i] = s[i].charCodeAt(0);
+		res[i] = s.charCodeAt(i);
 	return res;
 }
 /**
@@ -59,7 +54,7 @@ function toHexadecimalString(s)
 	var res = "";
 	for (var i = 0; i < s.length; i++)
 	{
-		var tmp = '0' + s[i].toString(16);
+		var tmp = '0' + s[i].toString(16).toUpperCase();
 		res += tmp.substr(tmp.length - 2);
 	}
 	return res;
@@ -71,7 +66,7 @@ function toHexadecimalString(s)
 function fromHexadecimal(s)
 {
 	var res = "";
-	for (var i = 0; i < s.length; i++)
+	for (var i = 0; i < s.length && s[i]; i++)
 		res += String.fromCharCode(s[i]);
 	return res;
 }
@@ -155,16 +150,18 @@ function generateRoundKey(key)
 }
 /**
  * @param {String} string representation of plain text
+ * @param {Number} seed for bbs
+ * @param {Number[]} key for encryption
  * @return {String} string representation of cipher text
  */
-function getCipher(s)
+function getCipher(s, n, k)
 {
 	s = toHexadecimal(s);
 	//s = [0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff];
 	//s = [0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34];
 	var res = [];
-	var iv = bbs(nByte, 0);
-	var key = generateRoundKey(bbs(nByte, 0));
+	var iv = bbs(nByte, n);
+	var key = generateRoundKey(k);
 	//var iv = [];
 	//var key = generateRoundKey([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]);
 	//var key = generateRoundKey([0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c]);
@@ -189,17 +186,19 @@ function getCipher(s)
 }
 /**
  * @param {String} string representation of cipher text
+ * @param {Number} seed for bbs
+ * @param {Number[]} key for decryption
  * @return {String} string representation of plain text
  */
-function getPlain(s)
+function getPlain(s, n, k)
 {
 	/* assert no missing values */
 	if (s.length % (nByte << 1))
 		throw 'Missing Some Values';
 	s = fromHexadecimalString(s);
 	var res = [];
-	var iv = bbs(nByte, 1);
-	var key = generateRoundKey(bbs(nByte, 1));
+	var iv = bbs(nByte, n);
+	var key = generateRoundKey(k);
 	//var iv = [];
 	//var key = generateRoundKey([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]);
 	//var key = generateRoundKey([0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c]);
@@ -346,20 +345,42 @@ function decrypt(s, key)
 	return res;
 }
 /**
- * @param {Number} amount needed
- * @param {Number} 0 send, 1 recv
- * @return {Number[]} hexadecimal number
+ * @param {Number} number of element
+ * @param {Number} bbs seed
+ * @return {Number[]} n element, 8 bit each
  */
-function bbs(n, k)
+function bbs(n, s)
 {
-	var m = 2146918769;
+	var m = 46129;
 	var res = [];
+	for (s = s % m; gcd(s, m) != 1; )
+	{
+		s = s + 1;
+		if (s >= m)
+			s = s - m;
+	}
+	s = s * s % m;
 	for (var i = 0; i < n; i++)
 		res[i] = 0;
 	for (var i = 0; i < (n << 3); i++)
 	{
-		N[k] = N[k] * N[k] % m;
-		res[i >> 3] = (res[i >> 3] << 1) | (N[k] & 1);
+		s = s * s % m;
+		res[i >> 3] = (res[i >> 3] << 1) | (s & 1);
 	}
 	return res;
+}
+/**
+ * @param {Number} x
+ * @param {Number} y
+ * @return {Number} GCD of x and y
+ */
+function gcd(x, y)
+{
+	for (; y; )
+	{
+		var z = x % y;
+		x = y;
+		y = z;
+	}
+	return x;
 }
