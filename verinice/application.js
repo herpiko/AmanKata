@@ -5,7 +5,9 @@
  */
 
 var fs = require('fs');
-var io = require('socket.io').listen(9999);
+var server_port = process.env.OPENSHIFT_NODEJS_PORT || 9999;
+var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1'
+var io = require('socket.io').listen(server_port, server_ip_address);
 var jsSHA = require('jssha');
 var bigint = require('../static/bigint.js');
 eval(fs.readFileSync('../static/bigint.js').toString());
