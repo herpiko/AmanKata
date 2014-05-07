@@ -19,6 +19,11 @@ db.on('error', console.error.bind(console, 'connection error:'));
                 public_RSA: {
                     e: String,
                     n: String
+                },
+                public_DHE: {
+                    g: String,
+                    q: String,
+                    y: String
                 }
             },
             sign: String

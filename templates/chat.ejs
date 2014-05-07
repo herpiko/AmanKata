@@ -165,6 +165,34 @@
 </html>
 
 <script type="text/javascript">
+	var eVeriNice = str2bigInt('10001', 16, 1, 1);
+    var nVeriNice = str2bigInt('5E89E95A0DD227CE91F0549A0ECDBAA33676FF252077F5317DAE5B3EA2E16B82D1F30497C9A74CF5F646C1A75C163B5C9D6C88D4BB8732BAF537190D943808A656F2FFD3D46DC0C22F31AD98B2F29910F8DA223ED9C317866CAF2790BEEF0AB4B702CD1B302A567053A5CDBF29E5E4276AEE29B5AC41E1FE54EEC89040C8B213', 16, 1, 1);
+
+	var verifySign = function(str, sign, fn) {
+		console.log(str);
+		console.log(sign);
+	    var shaObj = new jsSHA(str, 'TEXT');
+	    var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
+	    var verify = bigInt2str(powMod(str2bigInt(sign, 16, 1, 1), eVeriNice, nVeriNice), 16);
+	    console.log(verify);
+	    console.log(hash);
+	    fn(hash == verify);
+	};
+
+	var reorderCertificate = function(certificate) {
+		console.log(certificate);
+		new_certificate = {};
+		new_certificate['user_id'] = certificate.user_id;
+		new_certificate['public_RSA'] = {};
+		new_certificate['public_RSA']['e'] = certificate.public_RSA.e;
+		new_certificate['public_RSA']['n'] = certificate.public_RSA.n;
+		new_certificate['public_DHE'] = {};
+		new_certificate['public_DHE']['g'] = certificate.public_DHE.g;
+		new_certificate['public_DHE']['q'] = certificate.public_DHE.q;
+		new_certificate['public_DHE']['y'] = certificate.public_DHE.y;
+		console.log(new_certificate);
+		return new_certificate;
+	}
   $(document).ready(function() {
   	
   	$('#main_chat').hide();
@@ -248,11 +276,19 @@
 		$.each(data_group.group_guest_user_id, function(key, value) {
 			$('#'+data+'_group_member').append('<li class="list-group-item">'+value.user_id+'</li>');
 			if (!(value.user_id in certificates)) {
-				certificates[value.user_id] = value.user_certificate;
+				value.user_certificate.certificate = reorderCertificate(value.user_certificate.certificate);
+				verifySign(JSON.stringify(value.user_certificate.certificate), value.user_certificate.sign, function(valid) {
+					if (valid)
+						certificates[value.user_id] = value.user_certificate;
+				} );
 			}
 		});
 		if (!(data_group.group_host_user_id in certificates)) {
-			certificates[data_group.group_host_user_id] = data_group.group_host_user_certificate;
+			data_group.group_host_user_certificate.certificate = reorderCertificate(data_group.group_host_user_certificate.certificate);
+			verifySign(JSON.stringify(data_group.group_host_user_certificate.certificate), data_group.group_host_user_certificate.sign, function(valid) {
+					if (valid)
+						certificates[data_group.group_host_user_id] = data_group.group_host_user_certificate;
+			});
 		}
 	}
 	
