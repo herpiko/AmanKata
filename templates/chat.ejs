@@ -160,6 +160,12 @@
 	  </div><!-- /.modal-dialog -->
 	</div><!-- /.modal -->
 
+	<audio id="chatAudio">
+		<source src="static/notify.ogg" type="audio/ogg">
+		<source src="static/notify.mp3" type="audio/mpeg">
+		<source src="static/notify.wav" type="audio/wav">
+	</audio>
+
   </body>
 
 </html>
@@ -266,6 +272,7 @@
 			$('#' + obj.group_id + '_sign').show();
 		}
 		$('html, body').animate({scrollTop: $elem.height()}, 800);
+		$('#chatAudio')[0].play();
 	});
 
 	socket.on('newGroupClient', function(data_group) {
