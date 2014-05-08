@@ -9,10 +9,18 @@ var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 var app = require('http').createServer(handler);
 var server = app.listen(server_port, server_ip_address);
 var io = require('socket.io').listen(server);
+var validMiliSeconds = 1000 * 60 * 60 * 24 * 7;
 
 function handler (req, res) {
     res.writeHead(200);
     res.end("<h1>VeriNice!</h1>");
+}
+
+var validTime = function() {
+    var someDate = new Date();
+    someDate.setTime(someDate.getTime() + validMiliSeconds); 
+    console.log(someDate);
+    return someDate;
 }
 
 console.log("Listening verinice to " + server_ip_address + ":" + server_port);
@@ -24,6 +32,9 @@ var n = BigInteger.parse('5E89E95A0DD227CE91F0549A0ECDBAA33676FF252077F5317DAE5B
 
 io.sockets.on('connection', function (socket) {
     socket.on('signCertificate', function(data, fn) {
+        data.valid_begin_time = (new Date()); 
+        data.valid_end_time =  validTime();
+        //console.log(data.valid_end_date);
         var str = JSON.stringify(data);
         var shaObj = new jsSHA(str, 'TEXT');
         var hash = BigInteger.parse(shaObj.getHash('SHA-512', 'HEX').toUpperCase(), 16);
