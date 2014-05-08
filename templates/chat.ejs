@@ -81,6 +81,10 @@
 		.hide {
 			display: none;
 		}
+
+		.over-text {
+			word-wrap: break-word;
+		}
 	</style>
   </head>
   
@@ -332,7 +336,7 @@
 		}
 
 		var $elem = $('#' + obj.group_id + '_group_message');
-		$elem.append('<div class="bs-callout bs-callout-left bs-callout-warning"> <h4> ' + obj.from + '</h4><p>' + obj.the_message + '</p></div>');
+		$elem.append('<div class="bs-callout bs-callout-left bs-callout-warning over-text"> <h4> ' + obj.from + '</h4><p>' + obj.the_message + '</p></div>');
 		if (current_group_id != obj.group_id) {
 			$('#' + obj.group_id + '_sign').show();
 		}
@@ -433,7 +437,7 @@
   	function updateChat() {
   		var chat_message = $('#chat_message').val().replace(/[\r\n\t]/g, '');
   		if (!chat_message) return;
-  		$('#'+current_group_id+'_group_message').append('<div class="bs-callout bs-callout-right bs-callout-info text-right"><h4>you</h4><p>'+chat_message+'</p></div>');
+  		$('#'+current_group_id+'_group_message').append('<div class="bs-callout bs-callout-right bs-callout-info text-right over-text"><h4>you</h4><p>'+chat_message+'</p></div>');
   		
   		if (user_id != groups[current_group_id]['group_host_user_id']) {
   			sendChat({'to':groups[current_group_id]['group_host_user_id'], 'from': user_id, 'group_id': current_group_id, 'the_message': chat_message});
