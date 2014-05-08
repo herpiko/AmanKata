@@ -139,6 +139,11 @@ io.sockets.on('connection', function(socket) {
             verinice_sock.disconnect();
             fn(null);
         });
+        verinice_sock.on('error', function() {
+            // If connection to verinice occur, return callback with null
+            verinice_sock.disconnect();
+            fn(null);
+        });
     });
 
     /*socket.on('doLogin', function(data, fn) {
