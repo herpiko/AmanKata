@@ -57,12 +57,13 @@ db.on('error', console.error.bind(console, 'connection error:'));
         })
     };
 
-    /*module.exports.checkUser = function(data, fn) {
-        User.findOne({'user_id': data['user_id'], 'password': data['password']}, function(err, User) {
+    /*module.exports.checkUserUniqueness = function(data, fn) {
+        var query_where = { $or: [ 'user_id': data['user_id'] , 'certificate.certificate.public_DHE.y': data.certificate.certificate.public_DHE.y, 'certificate.certificate.public_RSA.n': data.certificate.certificate.public_RSA.n  ] };
+        User.findOne(query_where, function(err, User) {
             if (err) fn(false);
             else {
-                if(User != null) fn(true);
-                else fn(false);
+                if(User != null) fn(false);
+                else fn(true);
             };
         });
     };*/

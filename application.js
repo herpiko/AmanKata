@@ -185,59 +185,62 @@ io.sockets.on('connection', function(socket) {
     });
 
     socket.on('newGroup', function(data, fn) {
-        //check validity
-        var new_group = data;
-		var group_id = generateGroupKey();
-		groups[group_id] = [];
-		users[data["group_host_user_id"]]["groups"].push(group_id);
-		groups[group_id] = data;
-		groups[group_id]['group_id'] = group_id;
-		model.getUser(data.group_host_user_id, function(host) {
-			groups[group_id].group_host_user_certificate = host.certificate;
-			model.getUsers(groups[group_id].group_guest_user_id, function(guests) {
-				//console.log("GUEST "+guests);
-				for (i in guests) {
-					var user = guests[i];
-					//console.log(guests[i]);
-					for (j in groups[group_id]["group_guest_user_id"]) {
-						//console.log("x "+groups[group_id]["group_guest_user_id"][j]+" "+user.user_id);
-						if (user.user_id == groups[group_id]["group_guest_user_id"][j]) {
-                             new_group_format = {};
-							 new_group_format["user_id"] = groups[group_id]["group_guest_user_id"][j];
-							 new_group_format["user_certificate"] = user.certificate;
-                             groups[group_id]["group_guest_user_id"][j] = new_group_format;
-                             //console.log("y");
-                             //console.log(groups[group_id]["group_guest_user_id"][j]);
-                             //console.log(groups[group_id]["group_guest_user_id"]);
-                             //console.log("y");
-                             break;
-						}
+        model.checkUsersList(data.group_guest_user_id, function(valid) {
+            if (!valid) {
+                fn(false);
+                return;
+            }
+            var new_group = data;
+    		var group_id = generateGroupKey();
+    		groups[group_id] = [];
+    		users[data["group_host_user_id"]]["groups"].push(group_id);
+    		groups[group_id] = data;
+    		groups[group_id]['group_id'] = group_id;
+    		model.getUser(data.group_host_user_id, function(host) {
+    			groups[group_id].group_host_user_certificate = host.certificate;
+    			model.getUsers(groups[group_id].group_guest_user_id, function(guests) {
+    				//console.log("GUEST "+guests);
+    				for (i in guests) {
+    					var user = guests[i];
+    					//console.log(guests[i]);
+    					for (j in groups[group_id]["group_guest_user_id"]) {
+    						//console.log("x "+groups[group_id]["group_guest_user_id"][j]+" "+user.user_id);
+    						if (user.user_id == groups[group_id]["group_guest_user_id"][j]) {
+                                 new_group_format = {};
+    							 new_group_format["user_id"] = groups[group_id]["group_guest_user_id"][j];
+    							 new_group_format["user_certificate"] = user.certificate;
+                                 groups[group_id]["group_guest_user_id"][j] = new_group_format;
+                                 //console.log("y");
+                                 //console.log(groups[group_id]["group_guest_user_id"][j]);
+                                 //console.log(groups[group_id]["group_guest_user_id"]);
+                                 //console.log("y");
+                                 break;
+    						}
 
-					}
-					//groups[group_id]["group_guest_user_id"][user.user_id]["group_guest_user_certificate"] = user.certificate;
-					//console.log(users);
-                    if (user.user_id in users)
-					{
-						users[user.user_id]["groups"].push(group_id);
-						users[user.user_id]['socket'].emit("newGroupClient", groups[group_id]);
-					}
-				}
-				/*for (user_id in data["group_guest_user_id"]) {
-					var user = data["group_guest_user_id"][user_id];
-					if (user in users)
-					{
-						users[user]["groups"].push(group_id);
-						socket.emit("newGroupClient", groups[group_id]);
-					}
-				}*/
-                //console.log("groups");
-                //console.log(groups)
-                //console.log("groups");
-				fn(true);
-			});
-		}, function(){} );
-
-
+    					}
+    					//groups[group_id]["group_guest_user_id"][user.user_id]["group_guest_user_certificate"] = user.certificate;
+    					//console.log(users);
+                        if (user.user_id in users)
+    					{
+    						users[user.user_id]["groups"].push(group_id);
+    						users[user.user_id]['socket'].emit("newGroupClient", groups[group_id]);
+    					}
+    				}
+    				/*for (user_id in data["group_guest_user_id"]) {
+    					var user = data["group_guest_user_id"][user_id];
+    					if (user in users)
+    					{
+    						users[user]["groups"].push(group_id);
+    						socket.emit("newGroupClient", groups[group_id]);
+    					}
+    				}*/
+                    //console.log("groups");
+                    //console.log(groups)
+                    //console.log("groups");
+    				fn(true);
+    			});
+    		}, function(){} );
+        } );
     });
 
     socket.on('requestCertificate', function(data, fn) {
