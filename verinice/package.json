@@ -5,6 +5,11 @@
   "private": true,
   "dependencies": {
     "socket.io": "0.9.16",
+    "biginteger": "1.0.3",
     "jssha": "1.5.0"
-  }
+  },
+  "scripts": {
+    "start": "node application.js"
+  },
+  "main": "application.js"
 }

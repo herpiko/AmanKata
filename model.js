@@ -1,6 +1,13 @@
 var mongoose = require('mongoose');
 var async = require('async');
-var database_server = 'mongodb://localhost/test'; // It actually dynamic depends on where the server is (in case you host it with OpenShift)
+var mongodb_host = process.env.OPENSHIFT_MONGODB_DB_HOST || '127.0.0.1';
+var mongodb_port = process.env.OPENSHIFT_MONGODB_DB_PORT || 27017;
+
+if(mongodb_host != '127.0.0.1') {
+    var database_server = 'mongodb://admin:74Sx8mE9t6CC@' + mongodb_host + ':' + mongodb_port + '/amankata'; // It actually dynamic depends on where the server is (in case you host it with OpenShift)
+} else {
+    var database_server = 'mongodb://localhost/test';
+}
 mongoose.connect(database_server);
 
 // State of the art
