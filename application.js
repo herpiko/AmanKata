@@ -118,14 +118,19 @@ io.sockets.on('connection', function(socket) {
             verinice_sock.emit('signCertificate', data['user_certificate'], function(result) {
                 // Add to database
                 var new_user = {'user_id': data['user_id'], 'certificate': result};
-                model.registerUser(new_user, function() {
-                    // Return the signed one
-                    fn(result);
-                    verinice_sock.disconnect();
-                }, function() {
-                    // If error occur when adding, also return null
-                    fn(null);
-                    verinice_sock.disconnect();
+                model.checkUserUniqueness(new_user, function(unique) {
+                    if (unique) {
+                        model.registerUser(new_user, function() {
+                            // Return the signed one
+                            fn(result);
+                            verinice_sock.disconnect();
+                        }, function() {
+                            // If error occur when adding, also return null
+                            fn(null);
+                            verinice_sock.disconnect();
+                        });
+                    } else
+                        fn(null);
                 });
             });
         });

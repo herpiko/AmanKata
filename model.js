@@ -57,8 +57,12 @@ db.on('error', console.error.bind(console, 'connection error:'));
         })
     };
 
-    /*module.exports.checkUserUniqueness = function(data, fn) {
-        var query_where = { $or: [ 'user_id': data['user_id'] , 'certificate.certificate.public_DHE.y': data.certificate.certificate.public_DHE.y, 'certificate.certificate.public_RSA.n': data.certificate.certificate.public_RSA.n  ] };
+    module.exports.checkUserUniqueness = function(data, fn) {
+        var query_where = { $or: [ 
+            {'user_id': data['user_id'] }, 
+            {'certificate.certificate.public_DHE.y': data.certificate.certificate.public_DHE.y},
+            {'certificate.certificate.public_RSA.n': data.certificate.certificate.public_RSA.n } 
+            ] };
         User.findOne(query_where, function(err, User) {
             if (err) fn(false);
             else {
@@ -66,7 +70,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
                 else fn(true);
             };
         });
-    };*/
+    };
 
     module.exports.getUser = function(user_id, fn, fn_error) {
         User.findOne( {'user_id' : user_id}, function (err, User) {
