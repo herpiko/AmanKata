@@ -228,19 +228,13 @@
 	    var shaObj = new jsSHA(str, 'TEXT');
 	    var hash = str2bigInt(shaObj.getHash('SHA-512', 'HEX').toUpperCase(), 16, 1);
 	    var verify = powMod(str2bigInt(sign, 16, 1), eVeriNice, nVeriNice);
-		console.log(str);
-		console.log(hash);
-		console.log(verify);
 	    fn(equals(hash, verify));
 	};
 
 	var dateValid = function(certificate) {
-		console.log(certificate);
 		var now = (new Date()).getTime();
 		var begin = new Date(certificate.valid_begin_time);
 		var end = new Date(certificate.valid_end_time);
-		console.log(begin.getTime());
-		//console.log(  now > certificate.valid_begin_time.getTime() && now < certificate.valid_end_time.getTime() );
 		return (  now > begin.getTime() && now < end.getTime() ); 
 	}
 
