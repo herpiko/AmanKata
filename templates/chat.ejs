@@ -77,6 +77,10 @@
 		.bs-callout-info h4 {
 		    color: #5bc0de;
 		}
+
+		.hide {
+			display: none;
+		}
 	</style>
   </head>
   
@@ -126,6 +130,7 @@
 			<textarea class="form-control" id="chat_message" rows="3"  style="width: 75%"></textarea>
 			<br/>
 			<button id="send" class="btn btn-primary">Send</button>
+			<span id="logo_emoji"><img width="25px" src="/static/images/emoji/smile.png"></span>
 		  </div>
 
           <br>
@@ -155,6 +160,50 @@
 	      </div>
 	      <div class="modal-footer">
 	        <!-- <button type="button" class="btn btn-primary">Start Chat</button> -->
+	        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+	      </div>
+	    </div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+
+	<div class="modal fade" id="list_emoji">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4 class="modal-title">List Emoji Icon</h4>
+	      </div>
+	      <div class="modal-body">
+	      	
+	      	<ul id="header_icon" class="nav nav-tabs">
+				<li class="active">
+					<a data-id="people" href="#people" data-toggle="tab">People</a>
+				</li>
+				<li>
+					<a data-id="nature" href="#nature" data-toggle="tab">Nature</a>
+				</li>
+			</ul>
+			
+			<div id="content_icon" class="tab-content">
+				<div class="tab-pane active" id="people">
+					<div style="height: 350px; overflow: auto;">
+				      	<table width="100%" class="text-center">
+				      		<tr>
+				      			<td width="20%"><img class="tooltipp" title=":bowtie:" src="/static/images/emoji/bowtie.png"><code class="hide">:bowtie:</code></td>
+				      			<td width="20%"><img class="tooltipp" title=":smile:" src="/static/images/emoji/smile.png"><code class="hide">:smile:</code></td>
+				      			<td width="20%"><img class="tooltipp" title=":laughing:" src="/static/images/emoji/laughing.png"><code class="hide">:laughing:</code></td>
+				      			<td width="20%"><img class="tooltipp" title=":blush:" src="/static/images/emoji/blush.png"><code class="hide">:blush:</code></td>
+				      			<td width="20%"><img class="tooltipp" title=":smiley:" src="/static/images/emoji/smiley.png"><code class="hide">:smiley:</code></td>
+				      		</tr>
+				      		<tr><td>&nbsp;</td></tr>
+				      	</table>
+					</div>
+				</div>
+			</div>
+
+	      	
+	      </div>
+	      <div class="modal-footer">
 	        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
 	      </div>
 	    </div><!-- /.modal-content -->
@@ -195,6 +244,7 @@
 	}
   $(document).ready(function() {
   	
+  	$('.tooltipp').tooltip();
   	$('#main_chat').hide();
   	$('#chat_bar').hide();
 
@@ -454,6 +504,20 @@
 
   	$('#logout').click(function() {
   		$.localStorage.removeAll();
+  	});
+
+  	$('#logo_emoji').click(function() {
+  		$('#list_emoji').modal('show');
+  	});
+
+  	$('.tooltipp').click(function() {
+  		var temp = $(this).parent().find('code');
+  		temp = temp.text();
+  		var cur_text = $('#chat_message').val();
+  		cur_text = cur_text + temp;
+  		$('#chat_message').val(cur_text);
+  		$('#list_emoji').modal('hide');
+  		$('#chat_message').focus();
   	});
 
   });
