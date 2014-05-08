@@ -28,9 +28,8 @@ db.on('error', console.error.bind(console, 'connection error:'));
                     n: String
                 },
                 public_DHE: {
-                    g: String,
-                    q: String,
-                    y: String
+                    y: String,
+                    q: String
                 }
             },
             sign: String

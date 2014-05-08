@@ -189,9 +189,8 @@
 		new_certificate['public_RSA']['e'] = certificate.public_RSA.e;
 		new_certificate['public_RSA']['n'] = certificate.public_RSA.n;
 		new_certificate['public_DHE'] = {};
-		new_certificate['public_DHE']['g'] = certificate.public_DHE.g;
-		new_certificate['public_DHE']['q'] = certificate.public_DHE.q;
 		new_certificate['public_DHE']['y'] = certificate.public_DHE.y;
+		new_certificate['public_DHE']['q'] = certificate.public_DHE.q;
 		return new_certificate;
 	}
   $(document).ready(function() {
@@ -199,7 +198,7 @@
   	$('#main_chat').hide();
   	$('#chat_bar').hide();
 
-  	var current_group_id, groups, data_storage, user_id, password, certificates, private_key_rsa,private_key_dhe;
+  	var current_group_id, groups, data_storage, user_id, password, certificates, private_rsa, private_dhe;
   	var socket = io.connect('http://' + document.domain + ':' + location.port);
   	groups = {};
   	certificates = {};
@@ -210,8 +209,8 @@
   		data_storage = $.localStorage.get('AmanKataCert');
   		user_id = data_storage['user_id'];
   		password = data_storage['password'];
-  		private_key_rsa = data_storage['private_key_rsa'];
-  		private_key_dhe = data_storage['private_key_dhe'];
+  		private_rsa = data_storage['private_rsa'];
+  		private_dhe = data_storage['private_dhe'];
 
   		socket.emit('doLogin', {'user_id': user_id, 'password': password}, function(result) {
 	        if (result) {
@@ -244,7 +243,7 @@
   	}
 
   	socket.on('retrieveChatClient', function(obj) {
-  		var x = str2bigInt(private_key_dhe, 16, 1);
+  		var x = str2bigInt(private_dhe.x, 16, 1);
   		var y = str2bigInt(certificates[obj.from].certificate.public_DHE.y, 16, 1);
   		var q = str2bigInt(certificates[obj.from].certificate.public_DHE.q, 16, 1);
 		var k = bigInt2str(powMod(y, x, q), 16);
@@ -339,13 +338,13 @@
   		obj.salt = now.toString();
   		obj.seed = now.getTime();
 
-  		var d = str2bigInt(private_key_rsa, 16, 1);
-  		var n = str2bigInt(certificates[obj.from].certificate.public_RSA.n, 16, 1);
+  		var d = str2bigInt(private_rsa.d, 16, 1);
+  		var n = str2bigInt(private_rsa.n, 16, 1);
         var shaObj = new jsSHA(obj.the_message + obj.salt, 'TEXT');
         var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
         obj.sign = bigInt2str(powMod(str2bigInt(hash, 16, 1), d, n), 16);
 
-  		var x = str2bigInt(private_key_dhe, 16, 1);
+  		var x = str2bigInt(private_dhe.x, 16, 1);
   		var y = str2bigInt(certificates[obj.to].certificate.public_DHE.y, 16, 1);
   		var q = str2bigInt(certificates[obj.to].certificate.public_DHE.q, 16, 1);
 		var k = bigInt2str(powMod(y, x, q), 16);

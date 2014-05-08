@@ -56,15 +56,15 @@
               <br/>
               <span id='public_rsa' class='over-text'>
               </span>
-              <br/>Public DHE (G, Q, Y):
+              <br/>Public DHE (Y, Q):
               <span id='public_dhe' class='over-text'>
               </span>
               <br/>Here is your private key (safe it in the safest place on earth that only you know it): 
-              <br/>Private RSA (D):
+              <br/>Private RSA (D, N):
               <br/>
               <span id='private_rsa' class='over-text'>
               </span>
-              <br/>Private DHE (X):
+              <br/>Private DHE (X, G, Q):
               <span id='private_dhe' class='over-text'>
               </span>
             </div>
@@ -148,7 +148,7 @@
       if (!user_id || !password) return;
       $('#pleaseWaitDialog').modal('show');
       generateKey(function(n, d, x, y) {
-        var certificate = {'user_id': user_id, 'public_RSA': {'e': bigInt2str(eRSA, 16), 'n': bigInt2str(n, 16)}, 'public_DHE': {'g': bigInt2str(gDHE, 16), 'q': bigInt2str(qDHE, 16), 'y': bigInt2str(y, 16)}};
+        var certificate = {'user_id': user_id, 'public_RSA': {'e': bigInt2str(eRSA, 16), 'n': bigInt2str(n, 16)}, 'public_DHE': {'y': bigInt2str(y, 16), 'q': bigInt2str(qDHE, 16)}};
         socket.emit('registerUser', {'user_id': user_id, 'password': password, 'user_certificate': certificate}, function(result) {
           if (result) {
             $('#pleaseWaitDialog').modal('hide');
@@ -156,10 +156,10 @@
             verifySign(str, result.sign, function(valid) {
               if (valid) {
                 $('#user_id_result').text(result.certificate.user_id);
-                $('#public_rsa').text('(' + result.certificate.public_RSA.e + ', ' + result.certificate.public_RSA.n + ')');
-                $('#public_dhe').text('(' + result.certificate.public_DHE.g + ', ' + result.certificate.public_DHE.q + ', ' + result.certificate.public_DHE.y + ')');
-                $('#private_rsa').text(bigInt2str(d, 16));
-                $('#private_dhe').text(bigInt2str(x, 16));
+                $('#public_rsa').text('(' + bigInt2str(eRSA, 16) + ', ' + bigInt2str(n, 16) + ')');
+                $('#public_dhe').text('(' + bigInt2str(y, 16) + ', ' + bigInt2str(qDHE, 16) + ')');
+                $('#private_rsa').text('(' + bigInt2str(d, 16) + ', ' + bigInt2str(n, 16) + ')');
+                $('#private_dhe').text('(' + bigInt2str(x, 16) + ', ' + bigInt2str(gDHE, 16) + ', ' + bigInt2str(qDHE, 16) + ')');
                 $('#success_message').show();
                 return;
               }
