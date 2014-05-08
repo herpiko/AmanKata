@@ -9,7 +9,7 @@
 	<script type="text/javascript" src="/static/jquery.min.js"></script>
 	<script type="text/javascript" src="/static/bootstrap.min.js"></script>
 	<script type="text/javascript" src="/static/socket.io.min.js"></script>
-	<script type="text/javascript" src="/static/aes-cbc-bbs.js"></script>
+	<script type="text/javascript" src="/static/aes-128-cbc.js"></script>
 	<script type='text/javascript' src='/static/sha.js'></script>
 	<script type='text/javascript' src='/static/bigint.js'></script>
 	<script type="text/javascript" src="/static/jquery.storageapi.min.js"></script>
@@ -207,9 +207,7 @@
   		window.location.href = "/";
   	} else {
   		data_storage = $.localStorage.get('AmanKataCert');
-  		console.log(data_storage);
   		user_id = data_storage['user_id'];
-  		//password = data_storage['password'];
   		private_rsa = data_storage['private_rsa'];
   		private_dhe = data_storage['private_dhe'];
   		g = str2bigInt(private_dhe.g, 16, 1);
@@ -221,9 +219,6 @@
   		y = mod(y, n);
   		z = powMod(y, d, n);
   		z = bigInt2str(z, 16);
-
-  		console.log(bigInt2str(y,16));
-  		console.log(z);
 
   		socket.emit('doLogin', {'user_id': user_id, 'z': z}, function(result) {
 	        if (result) {
@@ -349,7 +344,7 @@
 			res[i] = 0;
 		for (var i = 0; i < (size >> 7); i++)
 			for (var j = 0; j < 32; j++)
-				res[j >> 1] = res[j >> 1] ^ (parseInt(k[(i << 5) + j], 16) << ((j & 1) ? 0 : 4));
+				res[j >> 1] = res[j >> 1] ^ (parseInt(data[(i << 5) + j], 16) << ((j & 1) ? 0 : 4));
 		return res;
 	}
 	
@@ -371,8 +366,6 @@
 
 		var shaObj = new jsSHA(obj.timestamp, 'TEXT');
 		var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
-		console.log(hash);
-		console.log(compress(hash, 512));
 
 		obj.the_message = getCipher(obj.the_message, compress(k, 1024), compress(hash, 512));
 		socket.emit('sendChat', obj);

@@ -25,8 +25,8 @@ AmanKatakata and VeriNice shall be connected each other by single lane socket so
 The unsigned user certificate format is plain JSON text file which contains some field :
 
 * user_id: user id
-* public_RSA: (e, n)
-* public_DHE: (g, q, y)
+* public_RSA: (E, N)
+* public_DHE: (Y, Q)
 * sign: certificate authority sign (from RSA)
 
 Yes, there are two public/private key pair used in this system, I will tell you its purposes later on here..
@@ -49,8 +49,8 @@ Client-sided HTML5 Storage is used for authentication purposes for client to be 
 The format look like this :
 
 * user_id
-* private_key_rsa
-* private_key_dhe
+* private_RSA: (D, N)
+* private_DHE: (X, G, Q)
 
 ## The Steps
 ### Registration Process (/register)
