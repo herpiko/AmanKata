@@ -69,8 +69,8 @@
 
     function receivedText() {
       var text = fr.result;
-      var lines = text.split('\n');
-      if (lines.length != 5) {
+      var lines = text.split("\r\n");
+      if (lines.length != 6) {
         alert("Format File Salah!");
         return;
       }
@@ -83,36 +83,9 @@
           $('#private_key_dhe_x').val(lines[i]);
         } else if (i == 3) {
           $('#private_key_dhe_g').val(lines[i]);
-        } else {
+        } else if (i == 4) {
           $('#private_key_dhe_q').val(lines[i]);
         }
-      }
-    }
-
-    $('#login').click(function() {
-      if (window.File && window.FileReader && window.FileList && window.Blob) {
-        var input = document.getElementById('files');
-        if (!input) {
-          alert("Um, couldn't find the fileinput element.");
-          return;
-        }
-        else if (!input.files) {
-          alert("This browser doesn't seem to support the `files` property of file inputs.");
-          return;
-        }
-        else if (!input.files[0]) {
-          alert("Please select a file before Login");
-          return;
-        }
-        else {
-          var file = input.files[0];
-          fr = new FileReader();
-          fr.onload = receivedText;
-          fr.readAsText(file);
-        }
-      } else {
-        alert('The File APIs are not fully supported in this browser.');
-        return;
       }
 
       var user_id = $('#user_id').val();
@@ -142,6 +115,33 @@
       //simpan ke storage & redirect ke chat.
       $.localStorage.set('AmanKataCert', data_storage);
       window.location.href = "/chat";
+    }
+
+    $('#login').click(function() {
+      if (window.File && window.FileReader && window.FileList && window.Blob) {
+        var input = document.getElementById('files');
+        if (!input) {
+          alert("Um, couldn't find the fileinput element.");
+          return;
+        }
+        else if (!input.files) {
+          alert("This browser doesn't seem to support the `files` property of file inputs.");
+          return;
+        }
+        else if (!input.files[0]) {
+          alert("Please select a file before Login");
+          return;
+        }
+        else {
+          var file = input.files[0];
+          fr = new FileReader();
+          fr.onload = receivedText;
+          fr.readAsText(file);
+        }
+      } else {
+        alert('The File APIs are not fully supported in this browser.');
+        return;
+      }
     });
 
   });
