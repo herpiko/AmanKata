@@ -76,13 +76,11 @@ var checkUser = function(data, fn) {
         var z = BigInteger.parse(data.z, 16);
         var e = BigInteger.parse(user.certificate.certificate.public_RSA.e, 16);
         var n = BigInteger.parse(user.certificate.certificate.public_RSA.n, 16);
-        var y = z.modPow(e,n).toString(16);
-        console.log('user y '+ y);
-        console.log('server y '+ user.certificate.certificate.public_DHE.y);
-        if (y == user.certificate.certificate.public_DHE.y)
-            fn(true);
-        else
-            fn(false);
+        var y_client = z.modPow(e, n);
+        var one = BigInteger.parse('1', 16);
+        var y_server = BigInteger.parse(user.certificate.certificate.public_DHE.y, 16);
+        y_server = y_server.modPow(one, n);
+        fn(!y_client.compare(y_server));
     }, function() {
         fn(false);
     });

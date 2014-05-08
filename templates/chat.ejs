@@ -207,6 +207,7 @@
   		window.location.href = "/";
   	} else {
   		data_storage = $.localStorage.get('AmanKataCert');
+  		console.log(data_storage);
   		user_id = data_storage['user_id'];
   		//password = data_storage['password'];
   		private_rsa = data_storage['private_rsa'];
@@ -217,8 +218,10 @@
   		d = str2bigInt(private_rsa.d, 16, 1);
   		n = str2bigInt(private_rsa.n, 16, 1);
   		y = powMod(g, x, q);
+  		y = mod(y, n);
   		z = powMod(y, d, n);
   		z = bigInt2str(z, 16);
+
   		console.log(bigInt2str(y,16));
   		console.log(z);
 
@@ -247,7 +250,7 @@
 	        } else {
 	        	$.localStorage.removeAll();
 	        	alert('Error!');
-	        	window.location.href = "/";
+	        	//window.location.href = "/";
 	        }
 		});
   	}
