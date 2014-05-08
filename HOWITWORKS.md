@@ -38,8 +38,7 @@ The chat message format look like this :
 * group_id: group id
 * from: source user id
 * to: destination user id
-* salt: salt for hash message
-* seed: bbs seed for IV
+* timestamp: message time for salt and initial vector
 * the_message: encrypted message (key from DHE)
 * sign: source user sign (from RSA)
 

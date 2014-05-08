@@ -78,7 +78,9 @@ function fromHexadecimalString(s)
 {
 	var res = [];
 	for (var i = 0; i < (s.length >> 1); i++)
-		res[i] = parseInt(s.slice(i << 1, (i + 1) << 1), 16);
+		res[i] = 0;
+	for (var i = 0; i < s.length; i++)
+		res[i >> 1] = res[i >> 1] ^ (parseInt(s[i], 16) << ((i & 1) ? 0 : 4));
 	return res;
 }
 /**
@@ -150,17 +152,16 @@ function generateRoundKey(key)
 }
 /**
  * @param {String} string representation of plain text
- * @param {Number} seed for bbs
  * @param {Number[]} key for encryption
+ * @param {Number[]} initial vector for encryption
  * @return {String} string representation of cipher text
  */
-function getCipher(s, n, k)
+function getCipher(s, k, iv)
 {
 	s = toHexadecimal(s);
 	//s = [0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff];
 	//s = [0x32, 0x43, 0xf6, 0xa8, 0x88, 0x5a, 0x30, 0x8d, 0x31, 0x31, 0x98, 0xa2, 0xe0, 0x37, 0x07, 0x34];
 	var res = [];
-	var iv = bbs(nByte, n);
 	var key = generateRoundKey(k);
 	//var iv = [];
 	//var key = generateRoundKey([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]);
@@ -186,18 +187,17 @@ function getCipher(s, n, k)
 }
 /**
  * @param {String} string representation of cipher text
- * @param {Number} seed for bbs
  * @param {Number[]} key for decryption
+ * @param {Number[]} initial vector for decryption
  * @return {String} string representation of plain text
  */
-function getPlain(s, n, k)
+function getPlain(s, k, iv)
 {
 	/* assert no missing values */
 	if (s.length % (nByte << 1))
 		throw 'Missing Some Values';
 	s = fromHexadecimalString(s);
 	var res = [];
-	var iv = bbs(nByte, n);
 	var key = generateRoundKey(k);
 	//var iv = [];
 	//var key = generateRoundKey([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f]);
@@ -343,44 +343,4 @@ function decrypt(s, key)
 		for (var j = 0; j < col; j++)
 			res[j * row + i] = state[i][j];
 	return res;
-}
-/**
- * @param {Number} number of element
- * @param {Number} bbs seed
- * @return {Number[]} n element, 8 bit each
- */
-function bbs(n, s)
-{
-	var m = 46129;
-	var res = [];
-	for (s = s % m; gcd(s, m) != 1; )
-	{
-		s = s + 1;
-		if (s >= m)
-			s = s - m;
-	}
-	s = s * s % m;
-	for (var i = 0; i < n; i++)
-		res[i] = 0;
-	for (var i = 0; i < (n << 3); i++)
-	{
-		s = s * s % m;
-		res[i >> 3] = (res[i >> 3] << 1) | (s & 1);
-	}
-	return res;
-}
-/**
- * @param {Number} x
- * @param {Number} y
- * @return {Number} GCD of x and y
- */
-function gcd(x, y)
-{
-	for (; y; )
-	{
-		var z = x % y;
-		x = y;
-		y = z;
-	}
-	return x;
 }

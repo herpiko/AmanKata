@@ -253,30 +253,28 @@
   	}
 
   	socket.on('retrieveChatClient', function(obj) {
-  		var x = str2bigInt(private_dhe.x, 16, 1);
-  		var y = str2bigInt(certificates[obj.from].certificate.public_DHE.y, 16, 1);
-  		var q = str2bigInt(certificates[obj.from].certificate.public_DHE.q, 16, 1);
+		var shaObj = new jsSHA(obj.timestamp, 'TEXT');
+		var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
+
+		var x = str2bigInt(private_dhe.x, 16, 1);
+		var y = str2bigInt(certificates[obj.from].certificate.public_DHE.y, 16, 1);
+		var q = str2bigInt(certificates[obj.from].certificate.public_DHE.q, 16, 1);
 		var k = bigInt2str(powMod(y, x, q), 16);
-		var key = [];
-		for (; k.length < 32; k = k + '0');
-		for (var i = 0; i < 16; i++)
-			key[i] = 0;
-		for (var i = 0; i < 32; i++)
-			key[i >> 1] = (key[i >> 1] << 4) | parseInt(k[i], 16);
-		obj.the_message = getPlain(obj.the_message, obj.seed, key);
+		for (; k.length < 256; k += '0');
+		obj.the_message = getPlain(obj.the_message, compress(k, 1024), compress(hash, 512));
 
-  		var e = str2bigInt(certificates[obj.from].certificate.public_RSA.e, 16, 1);
-  		var n = str2bigInt(certificates[obj.from].certificate.public_RSA.n, 16, 1);
-        var shaObj = new jsSHA(obj.the_message + obj.salt, 'TEXT');
-        var hash = str2bigInt(shaObj.getHash('SHA-512', 'HEX').toUpperCase(), 16, 1);
-        var verify = powMod(str2bigInt(obj.sign, 16, 1), e, n);
-        
-	    if (!equals(hash, verify)) {
-	    	alert('invalid message');
-	    	return;
-    	}
+		var e = str2bigInt(certificates[obj.from].certificate.public_RSA.e, 16, 1);
+		var n = str2bigInt(certificates[obj.from].certificate.public_RSA.n, 16, 1);
+		var shaObj = new jsSHA(obj.the_message + obj.timestamp, 'TEXT');
+		var hash = str2bigInt(shaObj.getHash('SHA-512', 'HEX').toUpperCase(), 16, 1);
+		var verify = powMod(str2bigInt(obj.sign, 16, 1), e, n);
+		
+		if (!equals(hash, verify)) {
+			alert('invalid message');
+			return;
+		}
 
-  		var $elem = $('#' + obj.group_id + '_group_message');
+		var $elem = $('#' + obj.group_id + '_group_message');
 		$elem.append('<div class="bs-callout bs-callout-left bs-callout-warning"> <h4> ' + obj.from + '</h4><p>' + obj.the_message + '</p></div>');
 		if (current_group_id != obj.group_id) {
 			$('#' + obj.group_id + '_sign').show();
@@ -285,19 +283,18 @@
 		$('#chatAudio')[0].play();
 
 		emojify.setConfig({
-		    emojify_tag_type : 'div',
-		    only_crawl_id    : null,
-		    img_dir          : '/static/images/emoji',
-		    ignored_tags     : {
-		        'SCRIPT'  : 1,
-		        'TEXTAREA': 1,
-		        'A'       : 1,
-		        'PRE'     : 1,
-		        'CODE'    : 1
-		    }
+			emojify_tag_type : 'div',
+			only_crawl_id    : null,
+			img_dir          : '/static/images/emoji',
+			ignored_tags     : {
+				'SCRIPT'  : 1,
+				'TEXTAREA': 1,
+				'A'       : 1,
+				'PRE'     : 1,
+				'CODE'    : 1
+			}
 		});
 		emojify.run();
-
 	});
 
 	socket.on('newGroupClient', function(data_group) {
@@ -343,30 +340,39 @@
 		}
 	}
 	
-  	function sendChat(obj) {
-  		var now = new Date();
-  		obj.salt = now.toString();
-  		obj.seed = now.getTime();
-
-  		var d = str2bigInt(private_rsa.d, 16, 1);
-  		var n = str2bigInt(private_rsa.n, 16, 1);
-        var shaObj = new jsSHA(obj.the_message + obj.salt, 'TEXT');
-        var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
-        obj.sign = bigInt2str(powMod(str2bigInt(hash, 16, 1), d, n), 16);
-
-  		var x = str2bigInt(private_dhe.x, 16, 1);
-  		var y = str2bigInt(certificates[obj.to].certificate.public_DHE.y, 16, 1);
-  		var q = str2bigInt(certificates[obj.to].certificate.public_DHE.q, 16, 1);
-		var k = bigInt2str(powMod(y, x, q), 16);
-		var key = [];
-		for (; k.length < 32; k = k + '0');
+	function compress(data, size) {
+		var res = [];
 		for (var i = 0; i < 16; i++)
-			key[i] = 0;
-		for (var i = 0; i < 32; i++)
-			key[i >> 1] = (key[i >> 1] << 4) | parseInt(k[i], 16);
-		obj.the_message = getCipher(obj.the_message, obj.seed, key);
+			res[i] = 0;
+		for (var i = 0; i < (size >> 7); i++)
+			for (var j = 0; j < 32; j++)
+				res[j >> 1] = res[j >> 1] ^ (parseInt(k[(i << 5) + j], 16) << ((j & 1) ? 0 : 4));
+		return res;
+	}
+	
+  	function sendChat(obj) {
+		var now = new Date();
+		obj.timestamp = now.toString();
 
-  		socket.emit('sendChat', obj);
+		var d = str2bigInt(private_rsa.d, 16, 1);
+		var n = str2bigInt(private_rsa.n, 16, 1);
+		var shaObj = new jsSHA(obj.the_message + obj.timestamp, 'TEXT');
+		var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
+		obj.sign = bigInt2str(powMod(str2bigInt(hash, 16, 1), d, n), 16);
+
+		var x = str2bigInt(private_dhe.x, 16, 1);
+		var y = str2bigInt(certificates[obj.to].certificate.public_DHE.y, 16, 1);
+		var q = str2bigInt(certificates[obj.to].certificate.public_DHE.q, 16, 1);
+		var k = bigInt2str(powMod(y, x, q), 16);
+		for (; k.length < 256; k += '0');
+
+		var shaObj = new jsSHA(obj.timestamp, 'TEXT');
+		var hash = shaObj.getHash('SHA-512', 'HEX').toUpperCase();
+		console.log(hash);
+		console.log(compress(hash, 512));
+
+		obj.the_message = getCipher(obj.the_message, compress(k, 1024), compress(hash, 512));
+		socket.emit('sendChat', obj);
   	}
 
   	function updateChat() {
