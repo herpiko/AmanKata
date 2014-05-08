@@ -17,7 +17,6 @@ function handler (req, res) {
     res.end("<h1>VeriNice!</h1>");
 }
 
-var fs = require('fs');
 
 console.log("Listening verinice to " + server_ip_address + ":" + server_port);
 
