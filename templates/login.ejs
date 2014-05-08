@@ -42,9 +42,9 @@
           <br/>
           <textarea class="form-control" id="private_key_dhe_x" placeholder="Your Private DHE Key X"></textarea>
           <br/>
-          <textarea class="form-control" id="private_key_dhe_g" placeholder="Your Private DHE Key G"></textarea>
+          <textarea class="form-control" id="private_key_dhe_g" placeholder="Your Private DHE Key G">7FFFFFFF</textarea>
           <br/>
-          <textarea class="form-control" id="private_key_dhe_q" placeholder="Your Private DHE Key Q"></textarea>
+          <textarea class="form-control" id="private_key_dhe_q" placeholder="Your Private DHE Key Q">B037D2867723DC4F0352C2DD3AE53EF685EE197BB8BD63E11FDD32BC33FCA596B6DDCBA89B43EB09CBE1CC0F01E030A735E48FC7B166F99B8CEA2F5320806CB568826319DE68F0A8FE9EC2AEF892A2666197573EC11D794A062D9B11EA4BFD2834CFB4312299E0EE29B2CC81D0666DE5C635B730318F3FB2DF789034BC3DD063</textarea>
           <br/>
           <button id="login" type"button" class="btn btn-primary">Login</button>
          <p>If you don't have any credentials, <a href="/register">Please register</a> for just an half minute.</p>
@@ -68,8 +68,8 @@
       var user_id = $('#user_id').val();
       var password = $('#password').val();
       var private_rsa = {
-        'd': $('#private_key_rsa_d').val()
-        'n': $('#private_key_rsa_n').val(),
+        'd': $('#private_key_rsa_d').val(),
+        'n': $('#private_key_rsa_n').val()
       };
       var private_dhe = {
         'x' : $('#private_key_dhe_x').val(),
