@@ -36,9 +36,15 @@
           <br/>
           <input type="password" id="password" class="form-control" placeholder="Password">
           <br/>
-          <textarea class="form-control" id="private_key_rsa" placeholder="Your Private RSA Key"></textarea>
+          <textarea class="form-control" id="private_key_rsa_d" placeholder="Your Private RSA Key D"></textarea>
           <br/>
-          <textarea class="form-control" id="private_key_dhe" placeholder="Your Private DHE Key"></textarea>
+          <textarea class="form-control" id="private_key_rsa_n" placeholder="Your Private RSA Key N"></textarea>
+          <br/>
+          <textarea class="form-control" id="private_key_dhe_x" placeholder="Your Private DHE Key X"></textarea>
+          <br/>
+          <textarea class="form-control" id="private_key_dhe_g" placeholder="Your Private DHE Key G"></textarea>
+          <br/>
+          <textarea class="form-control" id="private_key_dhe_q" placeholder="Your Private DHE Key Q"></textarea>
           <br/>
           <button id="login" type"button" class="btn btn-primary">Login</button>
          <p>If you don't have any credentials, <a href="/register">Please register</a> for just an half minute.</p>
@@ -61,15 +67,21 @@
     $('#login').click(function() {
       var user_id = $('#user_id').val();
       var password = $('#password').val();
-      var private_key_rsa = $('#private_key_rsa').val();
-      var private_key_dhe = $('#private_key_dhe').val();
-      
+      var private_rsa = {
+        'd': $('#private_key_rsa_d').val()
+        'n': $('#private_key_rsa_n').val(),
+      };
+      var private_dhe = {
+        'x' : $('#private_key_dhe_x').val(),
+        'g' : $('#private_key_dhe_g').val(),
+        'q' : $('#private_key_dhe_q').val()
+      };
       // hash password disini !!!
       data_storage = {
         'user_id': user_id,
         'password': password,
-        'private_key_rsa': private_key_rsa,
-        'private_key_dhe': private_key_dhe
+        'private_rsa': private_rsa,
+        'private_dhe': private_dhe
       };
       //simpan ke storage & redirect ke chat.
       $.localStorage.set('AmanKataCert', data_storage);
