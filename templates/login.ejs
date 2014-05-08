@@ -31,18 +31,22 @@
         </div>
         <div class="col-md-4 well">
           <h2>Login Now</h2>
-          <p>Enter your user id, password and pass your secret private key here.</p>
-          <input type="text" id="user_id" class="form-control" placeholder="User ID" value="haidar">
+          <p>Enter your user id and pass your secret private key here.</p>
+          <input type="text" id="user_id" class="form-control" placeholder="User ID" value="">
           <br/>
-          <textarea class="form-control" id="private_key_rsa_d" placeholder="Your Private RSA Key D">509843A1863D0A780274AB91475C41F4EFAC1B65AB90F84569AFE0F4F00FE222F91C88B57379832778C392C8581423D7D6FB9E0A9CAEDE0F7E47C6963B7C0022BA8566C040FAC2DF942A003339BE7C53DB547AA01E37677B6B09BB63B6DC356142F0807C880D68AF0263374841AB6870C7AC6E8C19B17310D82CE536B14EDB99</textarea>
-          <br/>
-          <textarea class="form-control" id="private_key_rsa_n" placeholder="Your Private RSA Key N">9B6DCC3AFBDA7D7728C463DFDED5E079A0BE47F48AB0CD6EC28FC49D54A05A4C939DCFAAC18500C4ACF45F75B65FD6254010CAA8C75E82631059599B729A9F88C16124556741535AF7465F233520302990395DC4E9E82A2E08368D5E849C16774522833671D41CA8C4C4AE5238213E40FAF4C878BBAD2B2C49D00BE9D24ABCA7</textarea>
-          <br/>
-          <textarea class="form-control" id="private_key_dhe_x" placeholder="Your Private DHE Key X">CC0DAE2D5798B11DD10A1251FBA166DBB22D9C3674F5553C48C462510D380AB39C2737CE2C5CCE4BE63543A7F35725388A2E6257F49D5BECA1676D14884C2F53</textarea>
-          <br/>
-          <textarea class="form-control" id="private_key_dhe_g" placeholder="Your Private DHE Key G">7FFFFFFF</textarea>
-          <br/>
-          <textarea class="form-control" id="private_key_dhe_q" placeholder="Your Private DHE Key Q">B037D2867723DC4F0352C2DD3AE53EF685EE197BB8BD63E11FDD32BC33FCA596B6DDCBA89B43EB09CBE1CC0F01E030A735E48FC7B166F99B8CEA2F5320806CB568826319DE68F0A8FE9EC2AEF892A2666197573EC11D794A062D9B11EA4BFD2834CFB4312299E0EE29B2CC81D0666DE5C635B730318F3FB2DF789034BC3DD063</textarea>
+          <div id="oldField" style="display: none">
+            <textarea class="form-control" id="private_key_rsa_d" placeholder="Your Private RSA Key D"></textarea>
+            <br/>
+            <textarea class="form-control" id="private_key_rsa_n" placeholder="Your Private RSA Key N"></textarea>
+            <br/>
+            <textarea class="form-control" id="private_key_dhe_x" placeholder="Your Private DHE Key X"></textarea>
+            <br/>
+            <textarea class="form-control" id="private_key_dhe_g" placeholder="Your Private DHE Key G"></textarea>
+            <br/>
+            <textarea class="form-control" id="private_key_dhe_q" placeholder="Your Private DHE Key Q"></textarea>
+            <br/>
+          </div>
+          <input type="file" id="files" name="files" />
           <br/>
           <button id="login" type"button" class="btn btn-primary">Login</button>
          <p>If you don't have any credentials, <a href="/register">Please register</a> for just an half minute.</p>
@@ -61,10 +65,64 @@
     }
     
     var socket = io.connect('http://' + document.domain + ':' + location.port);
+    var fr;
+
+    function receivedText() {
+      var text = fr.result;
+      var lines = text.split('\n');
+      if (lines.length != 5) {
+        alert("Format File Salah!");
+        return;
+      }
+      for (var i = 0 ; i < lines.length ; i++) {
+        if (i == 0) {
+          $('#private_key_rsa_d').val(lines[i]);
+        } else if (i == 1) {
+          $('#private_key_rsa_n').val(lines[i]);
+        } else if (i == 2) {
+          $('#private_key_dhe_x').val(lines[i]);
+        } else if (i == 3) {
+          $('#private_key_dhe_g').val(lines[i]);
+        } else {
+          $('#private_key_dhe_q').val(lines[i]);
+        }
+      }
+    }
 
     $('#login').click(function() {
+      if (window.File && window.FileReader && window.FileList && window.Blob) {
+        var input = document.getElementById('files');
+        if (!input) {
+          alert("Um, couldn't find the fileinput element.");
+          return;
+        }
+        else if (!input.files) {
+          alert("This browser doesn't seem to support the `files` property of file inputs.");
+          return;
+        }
+        else if (!input.files[0]) {
+          alert("Please select a file before Login");
+          return;
+        }
+        else {
+          var file = input.files[0];
+          fr = new FileReader();
+          fr.onload = receivedText;
+          fr.readAsText(file);
+        }
+      } else {
+        alert('The File APIs are not fully supported in this browser.');
+        return;
+      }
+
       var user_id = $('#user_id').val();
       //var password = $('#password').val();
+      
+      if (!user_id) {
+        alert("User ID Harus Diisi");
+        return;
+      }
+
       var private_rsa = {
         'd': $('#private_key_rsa_d').val(),
         'n': $('#private_key_rsa_n').val()
@@ -74,7 +132,7 @@
         'g' : $('#private_key_dhe_g').val(),
         'q' : $('#private_key_dhe_q').val()
       };
-      // hash password disini !!!
+      
       data_storage = {
         'user_id': user_id,
         //'password': password,

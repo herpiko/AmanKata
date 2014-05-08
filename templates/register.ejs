@@ -11,6 +11,7 @@
     <script type='text/javascript' src='/static/socket.io.min.js'></script>
     <script type='text/javascript' src='/static/sha.js'></script>
     <script type='text/javascript' src='/static/bigint.js'></script>
+    <script type='text/javascript' src='/static/FileSaver.js'></script>
     <style type='text/css'>
       .over-text {
         word-wrap: break-word;
@@ -159,6 +160,9 @@
                 $('#private_rsa').text('(' + bigInt2str(d, 16) + ', ' + bigInt2str(n, 16) + ')');
                 $('#private_dhe').text('(' + bigInt2str(x, 16) + ', ' + bigInt2str(gDHE, 16) + ', ' + bigInt2str(qDHE, 16) + ')');
                 $('#success_message').show();
+                var key_text = bigInt2str(d, 16) + "\r\n" + bigInt2str(n, 16) + "\r\n" + bigInt2str(x, 16) + "\r\n" + bigInt2str(gDHE, 16) + "\r\n" + bigInt2str(qDHE, 16) + "\r\n";
+                var blob = new Blob([key_text], {type: "text/plain;charset=utf-8"});
+                saveAs(blob, result.certificate.user_id + "_key");
                 return;
               }
             });
