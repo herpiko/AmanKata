@@ -8,6 +8,7 @@ var http = require('http');
 var express = require('express');
 var app = express();
 var model = require('./model');
+var BigInteger = require('biginteger').BigInteger;
 
 // EXPRESS SETTING
 app.configure(function() {
@@ -69,6 +70,25 @@ var checkValidityAllUser = function(user_list, fn) {
     return;
 }
 
+var checkUser = function(data, fn) {
+    model.getUser(data.user_id, function(user){
+        console.log(user.certificate);
+        var z = BigInteger.parse(data.z, 16);
+        var e = BigInteger.parse(user.certificate.certificate.public_RSA.e, 16);
+        var n = BigInteger.parse(user.certificate.certificate.public_RSA.n, 16);
+        var y = z.modPow(e,n).toString(16);
+        console.log('user y '+ y);
+        console.log('server y '+ user.certificate.certificate.public_DHE.y);
+        if (y == user.certificate.certificate.public_DHE.y)
+            fn(true);
+        else
+            fn(false);
+    }, function() {
+        fn(false);
+    });
+    
+}
+
 // GLOBAL VARIABLE
 var user_of_socket = {}
 var users = {}
@@ -99,7 +119,7 @@ io.sockets.on('connection', function(socket) {
         verinice_sock.on('connect', function() {
             verinice_sock.emit('signCertificate', data['user_certificate'], function(result) {
                 // Add to database
-                var new_user = {'user_id': data['user_id'], 'password': data['password'], 'certificate': result};
+                var new_user = {'user_id': data['user_id'], 'certificate': result};
                 model.registerUser(new_user, function() {
                     // Return the signed one
                     fn(result);
@@ -129,7 +149,8 @@ io.sockets.on('connection', function(socket) {
 
     // TODO: What is doLoginChat? I can't see it in the specification -- initrunlevel0
     socket.on('doLogin', function(data, fn) {
-        model.checkUser(data, function(result) {
+        console.log(data);
+        checkUser(data, function(result) {
             if (result) {
                 var user_id = data.user_id;
                 initializeUser(user_id, socket);

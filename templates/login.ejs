@@ -32,15 +32,13 @@
         <div class="col-md-4 well">
           <h2>Login Now</h2>
           <p>Enter your user id, password and pass your secret private key here.</p>
-          <input type="text" id="user_id" class="form-control" placeholder="User ID">
+          <input type="text" id="user_id" class="form-control" placeholder="User ID" value="haidar">
           <br/>
-          <input type="password" id="password" class="form-control" placeholder="Password">
+          <textarea class="form-control" id="private_key_rsa_d" placeholder="Your Private RSA Key D">509843A1863D0A780274AB91475C41F4EFAC1B65AB90F84569AFE0F4F00FE222F91C88B57379832778C392C8581423D7D6FB9E0A9CAEDE0F7E47C6963B7C0022BA8566C040FAC2DF942A003339BE7C53DB547AA01E37677B6B09BB63B6DC356142F0807C880D68AF0263374841AB6870C7AC6E8C19B17310D82CE536B14EDB99</textarea>
           <br/>
-          <textarea class="form-control" id="private_key_rsa_d" placeholder="Your Private RSA Key D"></textarea>
+          <textarea class="form-control" id="private_key_rsa_n" placeholder="Your Private RSA Key N">9B6DCC3AFBDA7D7728C463DFDED5E079A0BE47F48AB0CD6EC28FC49D54A05A4C939DCFAAC18500C4ACF45F75B65FD6254010CAA8C75E82631059599B729A9F88C16124556741535AF7465F233520302990395DC4E9E82A2E08368D5E849C16774522833671D41CA8C4C4AE5238213E40FAF4C878BBAD2B2C49D00BE9D24ABCA7</textarea>
           <br/>
-          <textarea class="form-control" id="private_key_rsa_n" placeholder="Your Private RSA Key N"></textarea>
-          <br/>
-          <textarea class="form-control" id="private_key_dhe_x" placeholder="Your Private DHE Key X"></textarea>
+          <textarea class="form-control" id="private_key_dhe_x" placeholder="Your Private DHE Key X">CC0DAE2D5798B11DD10A1251FBA166DBB22D9C3674F5553C48C462510D380AB39C2737CE2C5CCE4BE63543A7F35725388A2E6257F49D5BECA1676D14884C2F53</textarea>
           <br/>
           <textarea class="form-control" id="private_key_dhe_g" placeholder="Your Private DHE Key G">7FFFFFFF</textarea>
           <br/>
@@ -66,7 +64,7 @@
 
     $('#login').click(function() {
       var user_id = $('#user_id').val();
-      var password = $('#password').val();
+      //var password = $('#password').val();
       var private_rsa = {
         'd': $('#private_key_rsa_d').val(),
         'n': $('#private_key_rsa_n').val()
@@ -79,7 +77,7 @@
       // hash password disini !!!
       data_storage = {
         'user_id': user_id,
-        'password': password,
+        //'password': password,
         'private_rsa': private_rsa,
         'private_dhe': private_dhe
       };

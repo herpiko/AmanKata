@@ -19,7 +19,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
     module.exports.is_connected = true;
     var userSchema = new mongoose.Schema({
         user_id: String,
-        password: String,
+        //password: String,
         certificate: {
             certificate: {
                 user_id: String,
@@ -40,7 +40,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
     module.exports.registerUser = function(data, fn, fn_error) {
         var user = new User({
             user_id: data['user_id'],
-            password: data['password'],
+            //password: data['password'],
             certificate: data['certificate']
         });
 
@@ -57,7 +57,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
         })
     };
 
-    module.exports.checkUser = function(data, fn) {
+    /*module.exports.checkUser = function(data, fn) {
         User.findOne({'user_id': data['user_id'], 'password': data['password']}, function(err, User) {
             if (err) fn(false);
             else {
@@ -65,7 +65,7 @@ db.on('error', console.error.bind(console, 'connection error:'));
                 else fn(false);
             };
         });
-    };
+    };*/
 
     module.exports.getUser = function(user_id, fn, fn_error) {
         User.findOne( {'user_id' : user_id}, function (err, User) {

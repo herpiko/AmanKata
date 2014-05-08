@@ -198,7 +198,7 @@
   	$('#main_chat').hide();
   	$('#chat_bar').hide();
 
-  	var current_group_id, groups, data_storage, user_id, password, certificates, private_rsa, private_dhe;
+  	var current_group_id, groups, data_storage, user_id, password, certificates, private_rsa, private_dhe, y, z, g, x, q, n;
   	var socket = io.connect('http://' + document.domain + ':' + location.port);
   	groups = {};
   	certificates = {};
@@ -208,11 +208,21 @@
   	} else {
   		data_storage = $.localStorage.get('AmanKataCert');
   		user_id = data_storage['user_id'];
-  		password = data_storage['password'];
+  		//password = data_storage['password'];
   		private_rsa = data_storage['private_rsa'];
   		private_dhe = data_storage['private_dhe'];
+  		g = str2bigInt(private_dhe.g, 16, 1);
+  		x = str2bigInt(private_dhe.x, 16, 1);
+  		q = str2bigInt(private_dhe.q, 16, 1);
+  		d = str2bigInt(private_rsa.d, 16, 1);
+  		n = str2bigInt(private_rsa.n, 16, 1);
+  		y = powMod(g, x, q);
+  		z = powMod(y, d, n);
+  		z = bigInt2str(z, 16);
+  		console.log(bigInt2str(y,16));
+  		console.log(z);
 
-  		socket.emit('doLogin', {'user_id': user_id, 'password': password}, function(result) {
+  		socket.emit('doLogin', {'user_id': user_id, 'z': z}, function(result) {
 	        if (result) {
 	        	//chat dimulai.
 	        	$('#tag_user_id').text(user_id);
