@@ -228,8 +228,21 @@
 	    var shaObj = new jsSHA(str, 'TEXT');
 	    var hash = str2bigInt(shaObj.getHash('SHA-512', 'HEX').toUpperCase(), 16, 1);
 	    var verify = powMod(str2bigInt(sign, 16, 1), eVeriNice, nVeriNice);
+		console.log(str);
+		console.log(hash);
+		console.log(verify);
 	    fn(equals(hash, verify));
 	};
+
+	var dateValid = function(certificate) {
+		console.log(certificate);
+		var now = (new Date()).getTime();
+		var begin = new Date(certificate.valid_begin_time);
+		var end = new Date(certificate.valid_end_time);
+		console.log(begin.getTime());
+		//console.log(  now > certificate.valid_begin_time.getTime() && now < certificate.valid_end_time.getTime() );
+		return (  now > begin.getTime() && now < end.getTime() ); 
+	}
 
 	var reorderCertificate = function(certificate) {
 		new_certificate = {};
@@ -240,6 +253,8 @@
 		new_certificate['public_DHE'] = {};
 		new_certificate['public_DHE']['y'] = certificate.public_DHE.y;
 		new_certificate['public_DHE']['q'] = certificate.public_DHE.q;
+		new_certificate['valid_begin_time'] = certificate.valid_begin_time;
+		new_certificate['valid_end_time'] = certificate.valid_end_time;
 		return new_certificate;
 	}
   $(document).ready(function() {
@@ -370,20 +385,20 @@
 			if (!(value.user_id in certificates)) {
 				value.user_certificate.certificate = reorderCertificate(value.user_certificate.certificate);
 				verifySign(JSON.stringify(value.user_certificate.certificate), value.user_certificate.sign, function(valid) {
-					if (valid)
+					if (valid && dateValid(value.user_certificate.certificate))
 						certificates[value.user_id] = value.user_certificate;
 					else
-						alert("Certificate from server not valid");
+						alert("Certificate from server for user "+value.user_id+" not valid");
 				} );
 			}
 		});
 		if (!(data_group.group_host_user_id in certificates)) {
 			data_group.group_host_user_certificate.certificate = reorderCertificate(data_group.group_host_user_certificate.certificate);
 			verifySign(JSON.stringify(data_group.group_host_user_certificate.certificate), data_group.group_host_user_certificate.sign, function(valid) {
-					if (valid)
+					if (valid && dateValid(data_group.group_host_user_certificate.certificate))
 						certificates[data_group.group_host_user_id] = data_group.group_host_user_certificate;
 					else
-						alert("Certificate from server not valid");
+						alert("Certificate from server for user "+data_group.group_host_user_id+" not valid");
 			});
 		}
 	}

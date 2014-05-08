@@ -30,7 +30,9 @@ db.on('error', console.error.bind(console, 'connection error:'));
                 public_DHE: {
                     y: String,
                     q: String
-                }
+                },
+                valid_begin_time: Date,
+                valid_end_time: Date
             },
             sign: String
         }
