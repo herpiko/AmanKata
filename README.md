@@ -26,6 +26,7 @@ Secure Web Based Chat using Node.js
 
 ## Resources
 
+* https://github.com/arvida/emoji-cheat-sheet.com
 * https://github.com/Caligatio/jsSHA/
 * http://leemon.com/crypto/BigInt.html
 * http://www.cryogenius.com/software/primes/
