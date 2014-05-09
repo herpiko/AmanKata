@@ -162,7 +162,7 @@
                 $('#success_message').show();
                 var key_text = bigInt2str(d, 16) + "\r\n" + bigInt2str(n, 16) + "\r\n" + bigInt2str(x, 16) + "\r\n" + bigInt2str(gDHE, 16) + "\r\n" + bigInt2str(qDHE, 16) + "\r\n";
                 var blob = new Blob([key_text], {type: "text/plain;charset=utf-8"});
-                saveAs(blob, result.certificate.user_id + "_key");
+                saveAs(blob, result.certificate.user_id + "_key.txt");
                 return;
               }
             });
